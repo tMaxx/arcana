@@ -178,7 +178,7 @@ function suitIcon(suit) {
 /* ---------- card rendering ---------- */
 
 // Pip icon size (in cqw of the card width) by number of pips
-const PIP_SIZE = [0, 46, 30, 26, 28, 24, 26, 22, 22, 19, 19];
+const PIP_SIZE = [0, 30, 30, 26, 28, 24, 26, 22, 22, 19, 19];
 
 function pipsHTML(card) {
   const n = card.number;
