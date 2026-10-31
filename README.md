@@ -28,7 +28,18 @@ Open `index.html` directly, or serve the folder with any static server:
 python3 -m http.server 8000
 ```
 
-Then open <http://localhost:8000>. Offline caching requires `http`/`https`, so use a local server if you want to test the PWA. To deploy, upload the folder as-is (GitHub Pages, Netlify, S3, and so on).
+Then open <http://localhost:8000>. Offline caching requires `http`/`https`, so use a local server if you want to test the PWA.
+
+## Deployment
+
+The repo is set up for GitHub Pages at **arcana.nmaxx.pl**:
+
+- `CNAME` contains `arcana.nmaxx.pl`.
+- GitHub Pages source: `main` branch, `/ (root)`.
+- DNS: create a `CNAME` record for `arcana` pointing to `tmaxx.github.io.` (DNS-only in Cloudflare until GitHub issues the certificate).
+- In the GitHub repo, open **Settings → Pages**, set the custom domain to `arcana.nmaxx.pl`, and enable **Enforce HTTPS** once the certificate is ready.
+
+The app uses relative paths, so it also works from the default `https://tmaxx.github.io/arcana/` URL.
 
 ## Keyboard
 
