@@ -125,7 +125,6 @@ Modern browsers with `<dialog>`, `:has()`, `color-mix()`, container queries and 
 - **`js/app.js` is the only app script.** The old `js/_app.js` test copy and the `_t*.html` screenshot harnesses were removed; do not recreate them unless you need a temporary visual fixture.
 - **Artwork is lazy-loaded.** If you take screenshots, wait for images to decode or temporarily force eager loading; otherwise cards can appear blank.
 - **Health content is symbolic.** Keep the disclaimer in the UI and copied readings if you edit `js/extra/health.js`.
-- **`state before crash.md`** is the original requirements/context document, not part of the app.
 - **Deferred work** is listed under [Future ideas](#future-ideas).
 
 ## Future ideas
