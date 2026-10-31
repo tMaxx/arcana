@@ -649,11 +649,17 @@ dialog.modal[open] { animation: pop 0.18s ease-out; display: flex; flex-directio
   .hand-btn { margin-left: auto; }
   .hand-controls { padding: 0.7rem 1rem; }
   .hand-controls .ctx-seg { margin-left: 0; }
-  .modal-bar { padding: 0.7rem 1rem 0; flex-wrap: wrap; }
+  .seg { max-width: 100%; flex-wrap: wrap; border-radius: 14px; }
+  .seg button { padding: 0.28rem 0.6rem; font-size: 0.8rem; }
+  .modal-bar { padding: 0.7rem 3.2rem 0 1rem; flex-wrap: wrap; }
+  .modal-bar .close { position: absolute; top: 0.7rem; right: 0.8rem; z-index: 3; }
   .grid { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 0.7rem; }
   .detail { grid-template-columns: 1fr; padding: 1.2rem; }
   .detail-card { position: static; width: 55%; max-width: 220px; margin: 0 auto; }
-  .modal-actions { padding: 0.8rem 1.2rem; }
+  .modal-actions { padding: 0.8rem 1.2rem; flex-wrap: wrap; }
+  .modal-actions .btn.primary { flex: 1 1 100%; margin-left: 0; white-space: nowrap; }
+  #detail-pos { white-space: nowrap; }
+  .combo-list { grid-template-columns: 1fr; }
   .hand-row { grid-template-columns: 72px 1fr; }
   .row-actions { grid-column: 1 / -1; flex-direction: row; justify-content: flex-end; }
   .row-actions button { flex: 1; }
