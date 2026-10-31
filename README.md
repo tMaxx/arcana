@@ -1,24 +1,26 @@
-# Arcana: tarot reading helper
+# Arcana
 
-A small static web app. No build step, no dependencies, no external services.
+A small, dependency-free tarot reading helper that runs entirely in the browser. Browse all 78 cards, build a hand, choose a spread, and read interpretations and combinations. It works offline after the first visit.
 
-## Status
+Repository: https://github.com/tMaxx/arcana
 
-Feature-complete for the requested scope:
+## AI-created content
 
-- 78 cards with upright/reversed meanings and keywords.
-- Real 1909 Rider–Waite–Smith artwork, with the original CSS/SVG symbol faces kept as an option.
-- Reading contexts: General, Love, Work & money and Health.
-- Yes/no leanings and a hand tally.
-- Eight spreads, including Single, Past · Present · Future, Yes / No, Relationship and Celtic Cross.
-- Combinations database plus automatic pattern checks.
-- PWA/offline support.
+This project was built with AI assistance. The code, card interpretations, and love/career/health texts were generated or heavily edited by an AI coding agent, then checked for consistency. They are a starting point, not authoritative advice. Health readings are symbolic wellbeing themes, **not medical advice**. Use your own judgement.
 
-The data and app logic are covered by two non-visual checks (see [Tests](#tests)). The repository is at `git@github.com:tMaxx/arcana.git` (branch `main`).
+## Features
 
-Last verified: 2026-10-31 — both test scripts pass; visual pass on the artwork grid, symbols grid, Health detail and Yes/No layout.
+- **All 78 cards:** Major Arcana plus Wands, Cups, Swords and Pentacles, with upright and reversed meanings and keywords.
+- **Artwork or symbols:** toggle between the public-domain 1909 Rider–Waite–Smith scans and the original CSS/SVG faces (`v`). Artwork is small WebP and lazy-loaded.
+- **Reading contexts:** General, Love, Work & money and Health (`c` cycles). Each card has context-specific upright and reversed text.
+- **Yes / no leanings:** every card carries a yes, no or maybe leaning, with a tally in the hand.
+- **Spreads:** Free hand, Single card, Past · Present · Future, Yes / No, Situation · Challenge · Advice, Relationship, Horseshoe and Celtic Cross. Cards fill positions in order, or click an empty position to choose a card for it.
+- **Hand modal:** flip cards to reversed, reorder them, remove them, fill an empty position, or copy the reading as text.
+- **Combinations:** 42 authored pairs and triples plus automatic pattern checks (repeated ranks, court-heavy, major-heavy, suit-dominant, reversal-heavy). Active combinations appear in the hand.
+- **Offline / PWA:** `manifest.webmanifest` and `sw.js` cache the app shell and artwork after the first visit.
+- **Persistence:** the hand, spread, art mode, context and view are saved in `localStorage`.
 
-## Run
+## Quick start
 
 Open `index.html` directly, or serve the folder with any static server:
 
@@ -26,20 +28,7 @@ Open `index.html` directly, or serve the folder with any static server:
 python3 -m http.server 8000
 ```
 
-To host it, upload the folder as-is (GitHub Pages, Netlify, S3, and so on). The service worker only registers over `http`/`https`, so use a local server if you want to test offline mode.
-
-## Features
-
-- **All 78 cards:** Major Arcana plus Wands, Cups, Swords and Pentacles, with upright and reversed meanings and keywords.
-- **Card art:** toggle between the public-domain 1909 Rider–Waite–Smith scans and the original CSS/SVG symbol faces (`v`). Artwork is small WebP, lazy-loaded.
-- **Reading contexts:** General, Love, Work & money and Health (`c` cycles). Each card has context-specific upright and reversed text.
-- **Yes / no leanings:** every card carries a yes, no or maybe leaning, with a tally in the hand.
-- **Spreads:** Free hand, Single card, Past · Present · Future, Yes / No, Situation · Challenge · Advice, Relationship, Horseshoe and Celtic Cross. Cards fill positions in order, or click an empty position to choose a card for it; the hand can show a list or the spread layout.
-- **Hand modal:** flip cards to reversed, reorder them, remove them, fill an empty position, or copy the reading as text.
-- **Combinations:** a static database in `js/combos.js` (42 pairs and triples) plus automatic pattern checks (repeated ranks, court-heavy, major-heavy, suit-dominant, reversal-heavy). Active combinations show up in the hand modal.
-- **Extras:** astrological correspondences, a reflective question per card, and a health disclaimer.
-- **Offline / PWA:** `manifest.webmanifest` and `sw.js` cache the app shell and artwork after the first visit.
-- **Persistence:** the hand, spread, art mode, context and view are saved in `localStorage`.
+Then open <http://localhost:8000>. Offline caching requires `http`/`https`, so use a local server if you want to test the PWA. To deploy, upload the folder as-is (GitHub Pages, Netlify, S3, and so on).
 
 ## Keyboard
 
@@ -54,46 +43,35 @@ To host it, upload the folder as-is (GitHub Pages, Netlify, S3, and so on). The 
 | `c` | Cycle reading context |
 | `Esc` | Close dialog |
 
-## File map
+## Project layout
 
 | Path | Purpose |
 | --- | --- |
 | `index.html` | App shell, dialogs, script order |
 | `css/style.css` | Dark/gold theme, card faces, spread grid, dialogs |
 | `js/data.js` | 78 cards, suits, ranks, `EXTRA` registry |
-| `js/extra/major.js` | Love/career/question/yes-no content for the Major Arcana |
-| `js/extra/minor-wands-cups.js` | Same for Wands and Cups |
-| `js/extra/minor-swords-pentacles.js` | Same for Swords and Pentacles |
-| `js/extra/health.js` | Health readings for all 78 cards |
-| `js/spreads.js` | `SPREADS` definitions and grid positions |
+| `js/extra/*.js` | Love/career/question/yes-no content; `health.js` has health readings |
+| `js/spreads.js` | Spread definitions and grid positions |
 | `js/combos.js` | Authored combinations and pattern rules |
-| `js/app.js` | All UI, state and event handling |
+| `js/app.js` | UI, state and event handling |
 | `sw.js` | Service worker (shell + artwork caches) |
 | `manifest.webmanifest` | PWA manifest |
-| `icons/` | App icons |
 | `img/cards/` | 78 WebP card scans |
-| `tools/fetch-art.py` | One-off artwork downloader (requires Pillow) |
-| `tools/make-icons.py` | One-off icon generator (requires Pillow) |
-| `tools/check-data.js` | Content/asset integrity test |
-| `tools/check-app.js` | Non-visual app/hand/spread smoke test |
+| `tools/` | Asset generators and tests |
 
-## Data model and editing
+## Editing content
 
-- `js/data.js`: card text, keywords and suit blurbs. Cards are built from `MAJOR_DATA` and `MINOR_DATA`.
+- `js/data.js`: card text, keywords and suit blurbs.
 - `js/extra/*.js`: each card's `EXTRA` entry has `love`, `career`, `health` (each `[upright, reversed]`), `question` and `yn` (`["yes"|"no"|"maybe", ...]`).
 - `js/spreads.js`: the `SPREADS` array. Each position has a name, hint, grid column/row, and an optional `rot` for crossing cards.
 - `js/combos.js`: the `COMBOS` array. Each entry lists card ids, a kind (`good`, `warn` or `mixed`), a name and a text. Pattern rules are in `findPatterns`.
 - `css/style.css`: palette variables are at the top.
 
-`state.hand` is an array of `{ id, rev }` objects in spread-position order. A `null` entry means an empty spread position; it is persisted so cards stay in their slots. Switching to the Free hand spread compacts the array.
+`state.hand` is an array of `{ id, rev }` objects in spread-position order. A `null` entry means an empty spread position. `localStorage` keys are namespaced under `arcana.*`.
 
-`localStorage` keys are namespaced under `arcana.*` in `js/app.js`.
+## Development
 
-Major Arcana glyphs are the Golden Dawn astrological correspondences. Meanings follow the common Rider–Waite–Smith tradition. Health readings are symbolic wellbeing themes, **not medical advice**.
-
-## Tests
-
-The data layer and app logic can be checked without a browser:
+No build step and no dependencies. The data and app logic can be checked without a browser:
 
 ```sh
 node tools/check-data.js
@@ -102,38 +80,12 @@ node tools/check-app.js
 
 `check-data.js` verifies card/extra/artwork completeness, combo references, spread grid bounds and a `findCombos()` smoke test. `check-app.js` loads the real scripts in a small DOM stub and exercises spread slots, hand edits, contexts and combinations.
 
-Both are plain Node scripts with no dependencies. They are the preferred regression check when editing content or hand/spread logic.
+Modern browsers with `<dialog>`, `:has()`, `color-mix()`, container queries and `cqw` units are required. Artwork is lazy-loaded, so screenshot tools may need to wait for images to decode.
 
-### Visual checks
+## Acknowledgements
 
-There is no committed screenshot harness. For a one-off visual check, copy `index.html` to a temporary file, add a setup script that calls the global functions (`setTab`, `setArt`, `setCtx`, `setSpread`, `toggleCard`, `setView`, `openHand`, `openDetail`), and force `img.art-img` to eager loading before the load event. Keep the number of shots small; artwork is lazy-loaded.
-
-## PWA / offline
-
-- `sw.js` precaches the shell and all 78 artwork files.
-- Shell requests are network-first with a cache fallback; artwork is cache-first.
-- Bump `VERSION` in `sw.js` when changing shell files or artwork so clients drop old caches.
-- The service worker only registers over `http`/`https`; `file://` still works but without offline caching.
-
-## Browser support
-
-Modern browsers with `<dialog>`, `:has()`, `color-mix()`, container queries and `cqw` units. There is no build step or transpilation.
-
-## Handoff notes
-
-- **Repository:** `git@github.com:tMaxx/arcana.git`, branch `main`. The initial commit contains the full app and tests.
-- **`js/app.js` is the only app script.** The old `js/_app.js` test copy and the `_t*.html` screenshot harnesses were removed; do not recreate them unless you need a temporary visual fixture.
-- **Artwork is lazy-loaded.** If you take screenshots, wait for images to decode or temporarily force eager loading; otherwise cards can appear blank.
-- **Health content is symbolic.** Keep the disclaimer in the UI and copied readings if you edit `js/extra/health.js`.
-- **Deferred work** is listed under [Future ideas](#future-ideas).
-
-## Future ideas
-
-Not implemented yet, kept here so they are not lost:
-
-- **Per-card combination matrix:** replace or supplement the hand-written combo list with reusable suit, number and neighbouring-card rules.
-- **Shareable link:** encode the hand in the URL hash, for example `#hand=fool,tower.r,star`, so a reading can be bookmarked or sent without a backend.
-- **Random draw:** a “Draw N cards” button with a shuffle and optional random reversals.
+- **Claude Sonnet** — made the original build attempt. It crashed during an ambitious screenshot-based visual-testing run and burned through about $20 of traffic. RIP in screenshots; you tried.
+- **Zed's coding agent (DeepSeek V4.1 Flash 1017)** — finished the requested features, added the health readings and Yes/No spread, fixed the empty-slot flow, wrote the tests, and kept the final visual pass to four screenshots.
 
 ## License
 
