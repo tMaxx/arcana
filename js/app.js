@@ -113,9 +113,19 @@ function correspondence(card) {
   return `${element} · number ${card.number}`;
 }
 
+function searchAliases(card) {
+  const aliases = [card.label];
+  if (card.arcana === "major") aliases.push(String(card.number));
+  else if (card.number <= 10) aliases.push(String(card.number), ROMAN[card.number]);
+  return aliases.map((a) => String(a).toLowerCase());
+}
+
+const ALIAS_TOKENS = new Set();
 CARDS.forEach((c) => {
   c.extra = EXTRA[c.id] || null;
   c.corr = correspondence(c);
+  c.searchAliases = searchAliases(c);
+  c.searchAliases.forEach((a) => ALIAS_TOKENS.add(a));
 });
 
 /* ---------- state ---------- */
@@ -245,7 +255,12 @@ function matchesQuery(card, q) {
     ? [...card.extra.love, ...card.extra.career, ...(card.extra.health || []), card.extra.question].join(" ")
     : "";
   const hay = [card.name, card.keywords.join(" "), card.upright, card.reversed, extra].join(" ").toLowerCase();
-  return q.split(/\s+/).every((word) => hay.includes(word));
+  return q.split(/\s+/).every((word) => {
+    // Rank aliases (7, VII, Q, ...) must match exactly, so a single-letter
+    // alias does not accidentally match the same letter inside a meaning.
+    if (ALIAS_TOKENS.has(word)) return card.searchAliases.includes(word);
+    return hay.includes(word);
+  });
 }
 
 function visibleCardIds() {

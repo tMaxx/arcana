@@ -105,7 +105,7 @@ const ctx = vm.createContext({
 
 const exported = vm.runInContext(
   SCRIPTS.map(read).join("\n") +
-    "\n;({ CARDS, CARD_BY_ID, EXTRA, SPREADS, SPREAD_BY_ID, COMBOS, state, toggleCard, setSpread, fillEmptySlot, moveInHand, handAsText, setCtx, setArt, setView, meaningFor, findCombos })",
+    "\n;({ CARDS, CARD_BY_ID, EXTRA, SPREADS, SPREAD_BY_ID, COMBOS, state, toggleCard, setSpread, fillEmptySlot, moveInHand, handAsText, setCtx, setArt, setView, meaningFor, findCombos, matchesQuery, visibleCardIds })",
   ctx,
   { filename: "app-bundle.js" }
 );
@@ -128,6 +128,8 @@ const {
   setView,
   meaningFor,
   findCombos,
+  matchesQuery,
+  visibleCardIds,
 } = exported;
 
 const problems = [];
@@ -158,6 +160,41 @@ for (const c of CARDS) {
   check(e && typeof e.question === "string" && e.question, `missing question: ${c.id}`);
   check(e && Array.isArray(e.yn) && e.yn.length === 2, `missing yn: ${c.id}`);
 }
+
+/* ---------- search aliases ---------- */
+
+const sevenCups = CARD_BY_ID.get("cups-7");
+check(matchesQuery(sevenCups, "7 cups"), "search missed 7 cups");
+check(matchesQuery(sevenCups, "vii cups"), "search missed vii cups");
+check(matchesQuery(sevenCups, "7 of cups"), "search missed 7 of cups");
+check(matchesQuery(sevenCups, "vii of cups"), "search missed vii of cups");
+check(matchesQuery(sevenCups, "seven cups"), "search missed seven cups");
+check(matchesQuery(sevenCups, "cups 7"), "search missed cups 7");
+check(matchesQuery(sevenCups, "cups vii"), "search missed cups vii");
+check(!matchesQuery(sevenCups, "x cups"), "x cups should not match seven of cups");
+check(matchesQuery(CARD_BY_ID.get("cups-10"), "x cups"), "search missed x cups");
+check(matchesQuery(CARD_BY_ID.get("cups-ace"), "i cups"), "search missed i cups");
+check(matchesQuery(CARD_BY_ID.get("cups-ace"), "1 cups"), "search missed 1 cups");
+check(matchesQuery(CARD_BY_ID.get("cups-ace"), "ace cups"), "search missed ace cups");
+check(matchesQuery(CARD_BY_ID.get("cups-page"), "pg cups"), "search missed pg cups");
+check(matchesQuery(CARD_BY_ID.get("cups-knight"), "kn cups"), "search missed kn cups");
+check(matchesQuery(CARD_BY_ID.get("cups-queen"), "q cups"), "search missed q cups");
+check(matchesQuery(CARD_BY_ID.get("cups-king"), "k cups"), "search missed k cups");
+check(matchesQuery(CARD_BY_ID.get("chariot"), "vii"), "search missed vii for the chariot");
+check(matchesQuery(CARD_BY_ID.get("chariot"), "7"), "search missed 7 for the chariot");
+check(matchesQuery(CARD_BY_ID.get("world"), "xxi"), "search missed xxi for the world");
+check(matchesQuery(CARD_BY_ID.get("world"), "21"), "search missed 21 for the world");
+check(matchesQuery(CARD_BY_ID.get("fool"), "0"), "search missed 0 for the fool");
+check(!matchesQuery(sevenCups, "vii wands"), "vii wands should not match seven of cups");
+
+state.tab = "all";
+state.query = "vii cups";
+check(visibleCardIds().join(",") === "cups-7", "visibleCardIds should return seven of cups for vii cups");
+state.query = "7 cups";
+check(visibleCardIds().join(",") === "cups-7", "visibleCardIds should return seven of cups for 7 cups");
+state.query = "x cups";
+check(visibleCardIds().join(",") === "cups-10", "visibleCardIds should return ten of cups for x cups");
+state.query = "";
 
 /* ---------- free hand ---------- */
 
