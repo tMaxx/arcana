@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Arcana · Tarot Reading Helper</title>
+    <meta name="description" content="Browse every Major and Minor Arcana card, lay out a spread, and see interpretations and combinations to watch for." />
+    <meta name="theme-color" content="#0a0911" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="icon" href="icons/icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="topbar-row">
+        <a class="brand" href="#all" aria-label="Arcana home"><span class="brand-mark" aria-hidden="true">✦</span><span class="brand-name">Arcana</span></a>
+        <div class="search">
+          <input id="search" type="search" placeholder="Search cards, keywords, meanings…" autocomplete="off" spellcheck="false" aria-label="Search cards" />
+          <kbd aria-hidden="true">/</kbd>
+        </div>
+        <div class="seg" id="art-seg" role="group" aria-label="Card style" title="Card style (v)">
+          <button type="button" data-art="art">Artwork</button>
+          <button type="button" data-art="symbols">Symbols</button>
+        </div>
+        <button id="hand-btn" class="hand-btn" type="button" aria-haspopup="dialog" title="Show current hand (h)">
+          <span class="hand-label">My hand</span>
+          <span id="hand-count" class="badge-count">0</span>
+        </button>
+      </div>
+      <nav id="tabs" class="tabs" role="tablist" aria-label="Sections"></nav>
+    </header>
+
+    <main id="main" class="main"></main>
+
+    <footer class="footer">
+      <p>
+        <kbd>/</kbd> search · <kbd>h</kbd> hand · <kbd>1</kbd>–<kbd>7</kbd> sections · <kbd>v</kbd> artwork/symbols · <kbd>c</kbd> reading context · <kbd>←</kbd> <kbd>→</kbd> browse in card view · <kbd>a</kbd> add/remove · <kbd>Esc</kbd> close
+      </p>
+      <p class="muted">
+        Interpretations follow the common Rider–Waite–Smith tradition. Use them as a starting point, not a verdict.
+        Card artwork: Pamela Colman Smith, 1909 (public domain), scans via Wikimedia Commons.
+      </p>
+    </footer>
+
+    <!-- Card detail -->
+    <dialog id="detail-dialog" class="modal" aria-label="Card details">
+      <div class="modal-frame">
+        <div class="modal-bar">
+          <div class="seg ctx-seg" role="group" aria-label="Reading context">
+            <button type="button" data-ctx="general">General</button>
+            <button type="button" data-ctx="love">Love</button>
+            <button type="button" data-ctx="career">Work &amp; money</button>
+            <button type="button" data-ctx="health">Health</button>
+          </div>
+          <button class="close" type="button" data-close aria-label="Close">✕</button>
+        </div>
+        <div id="detail-body" class="detail"></div>
+        <div class="modal-actions">
+          <button id="detail-prev" type="button" class="btn" aria-label="Previous card">←</button>
+          <span id="detail-pos" class="muted"></span>
+          <button id="detail-next" type="button" class="btn" aria-label="Next card">→</button>
+          <button id="detail-add" type="button" class="btn primary" data-toggle="">+ Add to hand</button>
+        </div>
+      </div>
+    </dialog>
+
+    <!-- Current hand -->
+    <dialog id="hand-dialog" class="modal wide" aria-label="Current hand">
+      <div class="modal-frame">
+        <button class="close floating" type="button" data-close aria-label="Close">✕</button>
+        <header class="modal-head">
+          <h2>Current hand <small id="hand-title-count"></small></h2>
+          <div class="head-actions">
+            <button id="hand-copy" type="button" class="btn">Copy as text</button>
+            <button id="hand-clear" type="button" class="btn danger">Clear</button>
+          </div>
+        </header>
+        <div class="hand-controls">
+          <label class="field">
+            <span>Spread</span>
+            <select id="spread-select" aria-label="Spread"></select>
+          </label>
+          <div class="seg" id="view-seg" role="group" aria-label="Hand view">
+            <button type="button" data-view="list">List</button>
+            <button type="button" data-view="layout">Layout</button>
+          </div>
+          <div class="seg ctx-seg" role="group" aria-label="Reading context">
+            <button type="button" data-ctx="general">General</button>
+            <button type="button" data-ctx="love">Love</button>
+            <button type="button" data-ctx="career">Work &amp; money</button>
+            <button type="button" data-ctx="health">Health</button>
+          </div>
+        </div>
+        <div id="hand-body" class="hand-body"></div>
+      </div>
+    </dialog>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+    <script src="js/data.js"></script>
+    <script src="js/extra/major.js"></script>
+    <script src="js/extra/minor-wands-cups.js"></script>
+    <script src="js/extra/minor-swords-pentacles.js"></script>
+    <script src="js/extra/health.js"></script>
+    <script src="js/spreads.js"></script>
+    <script src="js/combos.js"></script>
+    <script src="js/app.js"></script>
+  </body>
+</html>
