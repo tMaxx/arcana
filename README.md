@@ -14,7 +14,7 @@ Feature-complete for the requested scope:
 - Combinations database plus automatic pattern checks.
 - PWA/offline support.
 
-The data and app logic are covered by two non-visual checks (see [Tests](#tests)). There is no git repository yet; see [Handoff notes](#handoff-notes).
+The data and app logic are covered by two non-visual checks (see [Tests](#tests)). The repository is at `git@github.com:tMaxx/arcana.git` (branch `main`).
 
 Last verified: 2026-10-31 — both test scripts pass; visual pass on the artwork grid, symbols grid, Health detail and Yes/No layout.
 
@@ -121,7 +121,7 @@ Modern browsers with `<dialog>`, `:has()`, `color-mix()`, container queries and 
 
 ## Handoff notes
 
-- **No git repository.** There is no history or rollback point. Initialise one before further work if that matters.
+- **Repository:** `git@github.com:tMaxx/arcana.git`, branch `main`. The initial commit contains the full app and tests.
 - **`js/app.js` is the only app script.** The old `js/_app.js` test copy and the `_t*.html` screenshot harnesses were removed; do not recreate them unless you need a temporary visual fixture.
 - **Artwork is lazy-loaded.** If you take screenshots, wait for images to decode or temporarily force eager loading; otherwise cards can appear blank.
 - **Health content is symbolic.** Keep the disclaimer in the UI and copied readings if you edit `js/extra/health.js`.
