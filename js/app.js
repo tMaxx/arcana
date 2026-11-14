@@ -816,8 +816,11 @@ function layoutHTML(spread) {
         return (
           `<div class="slot filled${rot}" style="${at}" data-drop="${i}" title="${p.name}: ${c.name}${h.rev ? " (reversed)" : ""}${clar ? ` + clarifier ${clar.name}` : ""}">` +
           `<button class="mini" data-open="${c.id}" data-from="hand" data-drag="p:${i}" draggable="false" aria-label="${p.name}: ${c.name}">${faceHTML(c, h.rev)}</button>` +
+          (clar
+            ? `<button class="mini clarifier-mini" data-open="${clar.id}" data-from="hand" data-drag="c:${i}" draggable="false" title="Clarifier: ${clar.name}" aria-label="Clarifier: ${clar.name}">${faceHTML(clar, h.clarifier.rev)}</button>`
+            : "") +
           `<span class="slot-num">${i + 1}</span>${label}` +
-          (clar ? `<span class="slot-clarifier" title="Clarifier: ${clar.name}">+ clarifier</span>` : "") +
+          (clar ? `<span class="slot-clarifier">clarifier</span>` : "") +
           `</div>`
         );
       }
