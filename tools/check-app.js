@@ -106,7 +106,7 @@ const ctx = vm.createContext({
 
 const exported = vm.runInContext(
   SCRIPTS.map(read).join("\n") +
-    "\n;({ CARDS, CARD_BY_ID, EXTRA, SPREADS, SPREAD_BY_ID, COMBOS, state, toggleCard, setSpread, fillEmptySlot, moveInHand, handAsText, setCtx, toggleCtx, setCombined, setArt, setView, meaningFor, meaningsFor, combinedFor, findCombos, matchesQuery, visibleCardIds, activeContexts, handCards, findHandEntry, handCount, startClarifier, ynTally, flipInHand })",
+    "\n;({ CARDS, CARD_BY_ID, EXTRA, SPREADS, SPREAD_BY_ID, COMBOS, state, toggleCard, setSpread, fillEmptySlot, moveInHand, handAsText, setCtx, toggleCtx, setCombined, setArt, setView, meaningFor, meaningsFor, combinedFor, findCombos, matchesQuery, visibleCardIds, activeContexts, handCards, findHandEntry, handCount, moveToClarifier, clarifyProblem, ynTally, flipInHand })",
   ctx,
   { filename: "app-bundle.js" }
 );
@@ -139,7 +139,8 @@ const {
   handCards,
   findHandEntry,
   handCount,
-  startClarifier,
+  moveToClarifier,
+  clarifyProblem,
   ynTally,
   flipInHand,
 } = exported;
@@ -287,21 +288,27 @@ const noCombinedText = handAsText();
 check(!noCombinedText.includes("Combined:"), "combined summary should be optional");
 setCtx("general");
 
-/* ---------- clarifiers ---------- */
+/* ---------- clarifiers: drag a hand card onto another ---------- */
 
 state.hand = [];
 state.spread = "three";
 state.pendingSlot = null;
-state.pendingClarifier = null;
 toggleCard("death");
-check(handCount() === 1 && state.hand[0].id === "death", "clarifier base add failed");
-startClarifier(0);
-check(state.pendingClarifier === 0, "startClarifier did not record the entry");
 toggleCard("tower");
-check(state.hand[0].clarifier && state.hand[0].clarifier.id === "tower", "clarifier add failed");
-check(handCount() === 1, "clarifier should not increase the position count");
+check(handCount() === 2, `clarifier setup failed: ${handCount()}`);
+
+// dragging the second card onto the first makes it a clarifier
+check(moveToClarifier({ index: 1, clarifier: false }, 0), "moveToClarifier failed");
+check(state.hand[0].clarifier && state.hand[0].clarifier.id === "tower", "clarifier not attached");
+check(!state.hand[1], "the source slot should be empty");
+check(handCount() === 1, "moving a card must not add a position");
 check(handCards().length === 2, "handCards should include the clarifier");
 check(findHandEntry("tower") && findHandEntry("tower").clarifier, "findHandEntry should find the clarifier");
+
+// a card cannot clarify its own position, and a card with its own clarifier cannot move
+check(clarifyProblem({ index: 0, clarifier: false }, 0) !== null, "self clarifier should be rejected");
+check(!moveToClarifier({ index: 0, clarifier: false }, 1), "a card with a clarifier should not move");
+
 flipInHand("tower");
 check(state.hand[0].clarifier.rev === true, "clarifier flip failed");
 const tally = ynTally();
@@ -309,19 +316,22 @@ check(tally.yes + tally.no + tally.maybe === 2, "tally should include the clarif
 const clarText = handAsText();
 check(clarText.includes("Clarifier: The Tower"), "clarifier missing from copied text");
 check(clarText.includes("Combinations:"), "clarifier combination missing from copied text");
+
+// a clarifier can move on to another card, leaving its old holder without one
+toggleCard("star");
+check(moveToClarifier({ index: 0, clarifier: true }, 1), "moving a clarifier failed");
+check(!state.hand[0].clarifier, "the old holder should lose its clarifier");
+check(state.hand[1].clarifier && state.hand[1].clarifier.id === "tower", "clarifier not attached to the new card");
+check(state.hand[1].clarifier.rev === true, "clarifier orientation should be preserved");
+
+// an occupied clarifier slot refuses a second card
+check(clarifyProblem({ index: 0, clarifier: false }, 1) !== null, "target with a clarifier should be rejected");
+check(!moveToClarifier({ index: 0, clarifier: false }, 1), "second clarifier should be rejected");
+
+// removal still works
 toggleCard("tower");
-check(!state.hand[0].clarifier, "clarifier removal failed");
-check(handCount() === 1 && !findHandEntry("tower"), "clarifier removal should keep the primary");
-startClarifier(0);
-toggleCard("tower");
-toggleCard("death");
-check(handCount() === 0 && !findHandEntry("tower"), "removing the primary should remove its clarifier");
-state.hand = [{ id: "death", rev: false }];
-state.pendingClarifier = null;
-startClarifier(0);
-toggleCard("death");
-check(!state.hand[0].clarifier, "a card cannot clarify itself");
-state.pendingClarifier = null;
+check(!state.hand[1].clarifier, "clarifier removal failed");
+check(handCount() === 2, "clarifier removal should keep the primary");
 
 setArt("symbols");
 check(state.art === "symbols", "setArt failed");
