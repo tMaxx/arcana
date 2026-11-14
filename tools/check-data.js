@@ -19,6 +19,7 @@ const sources = [
   "js/extra/minor-wands-cups.js",
   "js/extra/minor-swords-pentacles.js",
   "js/extra/health.js",
+  "js/extra/combined.js",
   "js/spreads.js",
   "js/combos.js",
 ].map(read);
@@ -27,12 +28,12 @@ const sources = [
 // and hand the values back explicitly.
 const exported = vm.runInContext(
   sources.join("\n") +
-    "\n;({ CARDS, CARD_BY_ID, EXTRA, HEALTH_READINGS, SUITS, SUIT_ORDER, RANKS, SPREADS, SPREAD_BY_ID, COMBOS, findCombos })",
+    "\n;({ CARDS, CARD_BY_ID, EXTRA, HEALTH_READINGS, COMBINED_READINGS, SUITS, SUIT_ORDER, RANKS, SPREADS, SPREAD_BY_ID, COMBOS, findCombos })",
   ctx,
   { filename: "data-bundle.js" }
 );
 
-const { CARDS, CARD_BY_ID, EXTRA, HEALTH_READINGS, SUITS, SUIT_ORDER, RANKS, SPREADS, SPREAD_BY_ID, COMBOS, findCombos } = exported;
+const { CARDS, CARD_BY_ID, EXTRA, HEALTH_READINGS, COMBINED_READINGS, SUITS, SUIT_ORDER, RANKS, SPREADS, SPREAD_BY_ID, COMBOS, findCombos } = exported;
 const problems = [];
 const fail = (msg) => problems.push(msg);
 
@@ -57,7 +58,7 @@ for (const c of CARDS) {
     fail(`missing EXTRA entry: ${c.id}`);
     continue;
   }
-  for (const key of ["love", "career", "health"]) {
+  for (const key of ["love", "career", "health", "combined"]) {
     if (!Array.isArray(e[key]) || e[key].length !== 2 || e[key].some((s) => !s)) {
       fail(`bad ${key} text: ${c.id}`);
     }
@@ -75,6 +76,12 @@ if (Object.keys(HEALTH_READINGS).length !== CARDS.length) {
 }
 for (const id of Object.keys(HEALTH_READINGS)) {
   if (!CARD_BY_ID.has(id)) fail(`health entry for unknown card: ${id}`);
+}
+if (Object.keys(COMBINED_READINGS).length !== CARDS.length) {
+  fail(`expected ${CARDS.length} combined entries, found ${Object.keys(COMBINED_READINGS).length}`);
+}
+for (const id of Object.keys(COMBINED_READINGS)) {
+  if (!CARD_BY_ID.has(id)) fail(`combined entry for unknown card: ${id}`);
 }
 
 /* --- artwork --- */

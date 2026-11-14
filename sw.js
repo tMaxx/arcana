@@ -6,7 +6,7 @@
  * - Card artwork is precached too and served cache-first.
  * Bump VERSION to force clients to drop old caches. */
 
-const VERSION = "v2";
+const VERSION = "v3";
 const SHELL_CACHE = `arcana-shell-${VERSION}`;
 const ART_CACHE = `arcana-art-${VERSION}`;
 
@@ -22,6 +22,7 @@ const SHELL = [
   "js/extra/minor-wands-cups.js",
   "js/extra/minor-swords-pentacles.js",
   "js/extra/health.js",
+  "js/extra/combined.js",
   "js/spreads.js",
   "js/combos.js",
   "js/app.js",

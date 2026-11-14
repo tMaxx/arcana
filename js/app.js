@@ -9,6 +9,7 @@ const KEYS = {
   spread: "arcana.spread.v1",
   art: "arcana.art.v1",
   ctx: "arcana.ctx.v1",
+  combined: "arcana.combined.v1",
   view: "arcana.view.v1",
   offline: "arcana.offline-toast.v1",
 };
@@ -66,11 +67,30 @@ function loadHand() {
     const raw = JSON.parse(prefs.get(KEYS.hand, "[]"));
     if (!Array.isArray(raw)) return [];
     // null marks an empty spread position; keep it so cards stay in their slots
-    const hand = raw.map((h) => (h && CARD_BY_ID.has(h.id) ? { id: h.id, rev: !!h.rev } : null));
+    const hand = raw.map((h) => {
+      if (!h || !CARD_BY_ID.has(h.id)) return null;
+      const entry = { id: h.id, rev: !!h.rev };
+      if (h.clarifier && CARD_BY_ID.has(h.clarifier.id)) {
+        entry.clarifier = { id: h.clarifier.id, rev: !!h.clarifier.rev };
+      }
+      return entry;
+    });
     while (hand.length && hand[hand.length - 1] === null) hand.pop();
     return hand;
   } catch {
     return [];
+  }
+}
+
+function loadCtx() {
+  try {
+    const raw = prefs.get(KEYS.ctx, "general");
+    const ids = raw.startsWith("[") ? JSON.parse(raw) : [raw];
+    const valid = CONTEXTS.map((c) => c.id);
+    const out = Array.isArray(ids) ? valid.filter((id) => ids.includes(id)) : [];
+    return out.length ? out : ["general"];
+  } catch {
+    return ["general"];
   }
 }
 
@@ -133,33 +153,72 @@ CARDS.forEach((c) => {
 const state = {
   tab: "all",
   query: "",
-  hand: loadHand(), // [{ id, rev } | null]; null = empty spread position
+  hand: loadHand(), // [{ id, rev, clarifier? } | null]; null = empty spread position
   spread: pick(KEYS.spread, SPREADS.map((s) => s.id), "free"),
   art: pick(KEYS.art, ["art", "symbols"], "art"),
-  ctx: pick(KEYS.ctx, CONTEXTS.map((c) => c.id), "general"),
+  ctx: loadCtx(),
+  combined: prefs.get(KEYS.combined, "1") !== "0",
   view: pick(KEYS.view, ["list", "layout"], "list"),
   pendingSlot: null, // spread position waiting for a card from the grid
+  pendingClarifier: null, // hand index waiting for a clarifier from the grid
   navList: [], // card ids for prev/next inside the detail dialog
   navIndex: 0,
 };
 
-const handIndex = (id) => state.hand.findIndex((h) => h && h.id === id);
+function findHandEntry(id) {
+  for (let i = 0; i < state.hand.length; i++) {
+    const h = state.hand[i];
+    if (!h) continue;
+    if (h.id === id) return { entry: h, index: i, clarifier: false };
+    if (h.clarifier && h.clarifier.id === id) return { entry: h, index: i, clarifier: true };
+  }
+  return null;
+}
+
 const handCount = () => state.hand.filter(Boolean).length;
+const handCards = () => {
+  const out = [];
+  state.hand.forEach((h) => {
+    if (!h) return;
+    out.push(h);
+    if (h.clarifier) out.push(h.clarifier);
+  });
+  return out;
+};
 const trimHand = () => {
   while (state.hand.length && state.hand[state.hand.length - 1] === null) state.hand.pop();
 };
-const inHand = (id) => handIndex(id) !== -1;
+const inHand = (id) => !!findHandEntry(id);
 const currentSpread = () => SPREAD_BY_ID.get(state.spread);
+const activeContexts = () => {
+  const list = CONTEXTS.filter((c) => state.ctx.includes(c.id));
+  return list.length ? list : [CONTEXTS[0]];
+};
 
 function saveHand() {
   prefs.set(KEYS.hand, JSON.stringify(state.hand));
 }
 
-/** Meaning text for a card in the current (or given) reading context. */
-function meaningFor(card, rev, ctx = state.ctx) {
+/** Meaning text for a card in one reading context. */
+function meaningFor(card, rev, ctx = "general") {
   const i = rev ? 1 : 0;
   if (ctx !== "general" && card.extra && card.extra[ctx]) return card.extra[ctx][i];
   return rev ? card.reversed : card.upright;
+}
+
+function meaningsFor(card, rev) {
+  return activeContexts().map((ctx) => ({
+    id: ctx.id,
+    label: ctx.label,
+    text: meaningFor(card, rev, ctx.id),
+  }));
+}
+
+function combinedFor(card, rev) {
+  if (card.extra && card.extra.combined) return card.extra.combined[rev ? 1 : 0];
+  return meaningsFor(card, rev)
+    .map((m) => `${m.label}: ${m.text}`)
+    .join(" ");
 }
 
 const ynFor = (card, rev) => (card.extra ? card.extra.yn[rev ? 1 : 0] : null);
@@ -325,7 +384,7 @@ function comboHTML(combo, active) {
 
 function renderCombosTab(main) {
   const q = state.query.trim().toLowerCase();
-  const ids = new Set(state.hand.filter(Boolean).map((h) => h.id));
+  const ids = new Set(handCards().map((h) => h.id));
   const isActive = (c) => c.cards.every((id) => ids.has(id));
   let list = COMBOS.filter((c) => !q || comboMatchesQuery(c, q));
   // active ones first, otherwise keep authored order
@@ -368,9 +427,15 @@ function setTab(id, { scroll = true } = {}) {
 
 function syncControls() {
   $$("[data-art]").forEach((b) => b.classList.toggle("active", b.dataset.art === state.art));
-  $$("[data-ctx]").forEach((b) => b.classList.toggle("active", b.dataset.ctx === state.ctx));
+  $$("[data-ctx]").forEach((b) => b.classList.toggle("active", state.ctx.includes(b.dataset.ctx)));
   $$("[data-view]").forEach((b) => b.classList.toggle("active", b.dataset.view === state.view));
-  $$("[data-art],[data-ctx],[data-view]").forEach((b) => b.setAttribute("aria-pressed", b.classList.contains("active")));
+  $$("[data-combined]").forEach((b) => {
+    b.hidden = state.ctx.length < 2;
+    b.classList.toggle("active", state.combined);
+  });
+  $$("[data-art],[data-ctx],[data-view],[data-combined]").forEach((b) =>
+    b.setAttribute("aria-pressed", b.classList.contains("active"))
+  );
   $("#spread-select").value = state.spread;
   $("#view-seg").hidden = state.spread === "free";
 }
@@ -389,14 +454,35 @@ function setArt(mode) {
 }
 
 function setCtx(ctx) {
-  state.ctx = ctx;
-  prefs.set(KEYS.ctx, ctx);
+  if (!CONTEXTS.some((c) => c.id === ctx)) return;
+  state.ctx = [ctx];
+  prefs.set(KEYS.ctx, JSON.stringify(state.ctx));
+  syncControls();
+  refreshOpenViews();
+}
+
+function toggleCtx(id) {
+  if (!CONTEXTS.some((c) => c.id === id)) return;
+  const set = new Set(state.ctx);
+  if (set.has(id)) set.delete(id);
+  else set.add(id);
+  if (!set.size) set.add("general");
+  state.ctx = CONTEXTS.map((c) => c.id).filter((cid) => set.has(cid));
+  prefs.set(KEYS.ctx, JSON.stringify(state.ctx));
+  syncControls();
+  refreshOpenViews();
+}
+
+function setCombined(on) {
+  state.combined = !!on;
+  prefs.set(KEYS.combined, state.combined ? "1" : "0");
   syncControls();
   refreshOpenViews();
 }
 
 function cycleCtx() {
-  const i = CONTEXTS.findIndex((c) => c.id === state.ctx);
+  const current = state.ctx.length === 1 ? state.ctx[0] : null;
+  const i = CONTEXTS.findIndex((c) => c.id === current);
   const next = CONTEXTS[(i + 1) % CONTEXTS.length];
   setCtx(next.id);
   toast(`Context: ${next.label}`);
@@ -413,6 +499,7 @@ function setSpread(id) {
   if (!SPREAD_BY_ID.has(id)) return;
   state.spread = id;
   state.pendingSlot = null;
+  state.pendingClarifier = null;
   // A free hand has no positions, so drop any empty-slot placeholders.
   if (!SPREAD_BY_ID.get(id).positions.length) state.hand = state.hand.filter(Boolean);
   prefs.set(KEYS.spread, id);
@@ -439,11 +526,32 @@ function updateBadge() {
 }
 
 function toggleCard(id) {
-  const i = handIndex(id);
   const card = CARD_BY_ID.get(id);
   const spread = currentSpread();
 
-  if (i === -1) {
+  // Picking a clarifier for a specific hand entry.
+  if (state.pendingClarifier !== null) {
+    const idx = state.pendingClarifier;
+    const entry = state.hand[idx];
+    if (!entry) {
+      state.pendingClarifier = null;
+      toast("That position is no longer available");
+      return;
+    }
+    if (findHandEntry(id)) {
+      toast("That card is already in the hand");
+      return;
+    }
+    entry.clarifier = { id, rev: false };
+    state.pendingClarifier = null;
+    const pos = spread.positions[idx];
+    toast(`Added ${card.name} as clarifier${pos ? ` for ${pos.name}` : ""}`);
+    handChanged();
+    return;
+  }
+
+  const found = findHandEntry(id);
+  if (!found) {
     let slot = state.pendingSlot;
     state.pendingSlot = null;
 
@@ -465,10 +573,13 @@ function toggleCard(id) {
       const pos = spread.positions[state.hand.length - 1];
       toast(pos ? `Added ${card.name} as ${pos.name}` : `Added ${card.name}`);
     }
+  } else if (found.clarifier) {
+    found.entry.clarifier = null;
+    toast(`Removed clarifier ${card.name}`);
   } else {
     // In a spread, leave the position empty rather than shifting later cards.
-    if (spread.positions.length) state.hand[i] = null;
-    else state.hand.splice(i, 1);
+    if (spread.positions.length) state.hand[found.index] = null;
+    else state.hand.splice(found.index, 1);
     trimHand();
     toast(`Removed ${card.name}`);
   }
@@ -498,18 +609,21 @@ function syncTiles() {
 }
 
 function moveInHand(id, delta) {
-  const i = handIndex(id);
+  const found = findHandEntry(id);
+  if (!found) return;
+  const i = found.index;
   const j = i + delta;
-  if (i === -1 || j < 0 || j >= state.hand.length) return;
+  if (j < 0 || j >= state.hand.length) return;
   [state.hand[i], state.hand[j]] = [state.hand[j], state.hand[i]];
   trimHand();
   handChanged();
 }
 
 function flipInHand(id) {
-  const h = state.hand[handIndex(id)];
-  if (!h) return;
-  h.rev = !h.rev;
+  const found = findHandEntry(id);
+  if (!found) return;
+  const target = found.clarifier ? found.entry.clarifier : found.entry;
+  target.rev = !target.rev;
   handChanged();
 }
 
@@ -518,28 +632,50 @@ function clearHand() {
   if (!confirm("Clear the entire hand?")) return;
   state.hand = [];
   state.pendingSlot = null;
+  state.pendingClarifier = null;
   handChanged();
 }
 
 function handAsText() {
   const spread = currentSpread();
-  const ctx = CONTEXTS.find((c) => c.id === state.ctx);
+  const contexts = activeContexts();
   const lines = [];
   if (spread.positions.length) lines.push(`Spread: ${spread.name}`);
-  if (state.ctx !== "general") lines.push(`Context: ${ctx.label}`);
-  if (state.ctx === "health") lines.push("Health readings are symbolic reflections on wellbeing, not medical advice.");
+  if (!(contexts.length === 1 && contexts[0].id === "general")) {
+    lines.push(`Context: ${contexts.map((c) => c.label).join(", ")}`);
+  }
+  if (contexts.some((c) => c.id === "health")) {
+    lines.push("Health readings are symbolic reflections on wellbeing, not medical advice.");
+  }
   if (lines.length) lines.push("");
+
+  const meaningLines = (card, rev, indent) => {
+    const out = [];
+    if (contexts.length > 1 && state.combined) out.push(`${indent}Combined: ${combinedFor(card, rev)}`);
+    const showLabels = contexts.length > 1 || contexts[0].id !== "general";
+    contexts.forEach((ctx) => {
+      out.push(`${indent}${showLabels ? `${ctx.label}: ` : ""}${meaningFor(card, rev, ctx.id)}`);
+    });
+    return out;
+  };
 
   state.hand.forEach((h, i) => {
     if (!h) return;
     const c = CARD_BY_ID.get(h.id);
     const pos = spread.positions.length ? (spread.positions[i] ? `${spread.positions[i].name}: ` : "Extra: ") : "";
     const yn = ynFor(c, h.rev);
-    lines.push(
-      `${i + 1}. ${pos}${c.name}${h.rev ? " (reversed)" : ""}${yn ? ` [${YN_LABEL[yn]}]` : ""}\n   ${meaningFor(c, h.rev)}`
-    );
+    lines.push(`${i + 1}. ${pos}${c.name}${h.rev ? " (reversed)" : ""}${yn ? ` [${YN_LABEL[yn]}]` : ""}`);
+    lines.push(...meaningLines(c, h.rev, "   "));
+    if (h.clarifier) {
+      const clar = CARD_BY_ID.get(h.clarifier.id);
+      const cyn = ynFor(clar, h.clarifier.rev);
+      lines.push(
+        `   Clarifier: ${clar.name}${h.clarifier.rev ? " (reversed)" : ""}${cyn ? ` [${YN_LABEL[cyn]}]` : ""}`
+      );
+      lines.push(...meaningLines(clar, h.clarifier.rev, "      "));
+    }
   });
-  const combos = findCombos(state.hand.filter(Boolean));
+  const combos = findCombos(handCards());
   if (combos.length) {
     lines.push("", "Combinations:");
     combos.forEach((c) => lines.push(`- ${c.name}: ${c.text}`));
@@ -559,8 +695,7 @@ async function copyHand() {
 
 function ynTally() {
   const t = { yes: 0, no: 0, maybe: 0 };
-  state.hand.forEach((h) => {
-    if (!h) return;
+  handCards().forEach((h) => {
     const v = ynFor(CARD_BY_ID.get(h.id), h.rev);
     if (v) t[v]++;
   });
@@ -568,6 +703,22 @@ function ynTally() {
 }
 
 /* ---------- hand dialog ---------- */
+
+function meaningsHTML(card, rev) {
+  const contexts = activeContexts();
+  const showLabels = contexts.length > 1 || contexts[0].id !== "general";
+  const combined =
+    contexts.length > 1 && state.combined
+      ? `<p class="ctx-meaning combined"><b>Combined:</b> ${combinedFor(card, rev)}</p>`
+      : "";
+  const body = contexts
+    .map(
+      (ctx) =>
+        `<p class="ctx-meaning">${showLabels ? `<b>${ctx.label}:</b> ` : ""}${meaningFor(card, rev, ctx.id)}</p>`
+    )
+    .join("");
+  return combined + body;
+}
 
 function handRowHTML(h, i, spread) {
   const c = CARD_BY_ID.get(h.id);
@@ -585,10 +736,11 @@ function handRowHTML(h, i, spread) {
     posLine +
     `<h3><span class="pos">${i + 1}</span> ${c.name} <span class="orient ${h.rev ? "rev" : ""}">${h.rev ? "Reversed" : "Upright"}</span> ${ynBadge(c, h.rev)}</h3>` +
     `<p class="kw">${c.keywords.join(" · ")}${c.corr ? ` · <span class="corr">${c.corr}</span>` : ""}</p>` +
-    `<p>${meaningFor(c, h.rev)}</p>` +
+    meaningsHTML(c, h.rev) +
     q +
     `</div>` +
     `<div class="row-actions">` +
+    `<button data-clarifier="${i}" title="${h.clarifier ? "Replace clarifier" : "Add a clarifier"}" aria-label="${h.clarifier ? "Replace clarifier for" : "Add a clarifier for"} ${c.name}">${h.clarifier ? "⇄" : "＋"} <span>Clarifier</span></button>` +
     `<button data-flip="${c.id}" title="Flip orientation" aria-label="Flip ${c.name}">⟲ <span>Flip</span></button>` +
     `<button data-left="${c.id}" title="Move earlier" aria-label="Move ${c.name} earlier" ${i === 0 ? "disabled" : ""}>↑</button>` +
     `<button data-right="${c.id}" title="Move later" aria-label="Move ${c.name} later" ${i === state.hand.length - 1 ? "disabled" : ""}>↓</button>` +
@@ -596,6 +748,35 @@ function handRowHTML(h, i, spread) {
     `</div>` +
     `</li>`
   );
+}
+
+function clarifierRowHTML(h, i, spread) {
+  if (!h.clarifier) return "";
+  const clar = h.clarifier;
+  const c = CARD_BY_ID.get(clar.id);
+  const pos = spread.positions[i];
+  const posLine = `<p class="posname clarifier">Clarifier${pos ? ` for ${pos.name}` : ""}</p>`;
+  const q = c.extra ? `<p class="ask">Ask: ${c.extra.question}</p>` : "";
+  return (
+    `<li class="hand-row clarifier-row" data-id="${c.id}">` +
+    `<button class="mini" data-open="${c.id}" data-from="hand" aria-label="View ${c.name}">${faceHTML(c, clar.rev)}</button>` +
+    `<div class="hand-info">` +
+    posLine +
+    `<h3>${c.name} <span class="orient ${clar.rev ? "rev" : ""}">${clar.rev ? "Reversed" : "Upright"}</span> ${ynBadge(c, clar.rev)}</h3>` +
+    `<p class="kw">${c.keywords.join(" · ")}${c.corr ? ` · <span class="corr">${c.corr}</span>` : ""}</p>` +
+    meaningsHTML(c, clar.rev) +
+    q +
+    `</div>` +
+    `<div class="row-actions">` +
+    `<button data-flip="${c.id}" title="Flip orientation" aria-label="Flip ${c.name}">⟲ <span>Flip</span></button>` +
+    `<button data-remove="${c.id}" title="Remove clarifier" aria-label="Remove clarifier ${c.name}">✕</button>` +
+    `</div>` +
+    `</li>`
+  );
+}
+
+function entryRowsHTML(h, i, spread) {
+  return handRowHTML(h, i, spread) + clarifierRowHTML(h, i, spread);
 }
 
 function emptySlotRowHTML(i, pos) {
@@ -615,10 +796,13 @@ function layoutHTML(spread) {
       const h = state.hand[i];
       if (h) {
         const c = CARD_BY_ID.get(h.id);
+        const clar = h.clarifier ? CARD_BY_ID.get(h.clarifier.id) : null;
         return (
-          `<div class="slot filled${rot}" style="${at}" title="${p.name}: ${c.name}${h.rev ? " (reversed)" : ""}">` +
+          `<div class="slot filled${rot}" style="${at}" title="${p.name}: ${c.name}${h.rev ? " (reversed)" : ""}${clar ? ` + clarifier ${clar.name}` : ""}">` +
           `<button class="mini" data-open="${c.id}" data-from="hand" aria-label="${p.name}: ${c.name}">${faceHTML(c, h.rev)}</button>` +
-          `<span class="slot-num">${i + 1}</span>${label}</div>`
+          `<span class="slot-num">${i + 1}</span>${label}` +
+          (clar ? `<span class="slot-clarifier" title="Clarifier: ${clar.name}">+ clarifier</span>` : "") +
+          `</div>`
         );
       }
       return (
@@ -638,10 +822,13 @@ function renderHand() {
   const spread = currentSpread();
   const n = handCount();
   const total = spread.positions.length;
+  const cards = handCards();
+  const clarCount = state.hand.filter((h) => h && h.clarifier).length;
   const inSpread = state.hand.filter((h, i) => i < total && h).length;
   const extras = state.hand.map((h, i) => ({ h, i })).filter((x) => x.i >= total && x.h);
 
-  $("#hand-title-count").textContent = total ? `${n} / ${total} cards` : n ? `${n} card${n === 1 ? "" : "s"}` : "empty";
+  const countLabel = total ? `${n} / ${total} cards` : n ? `${n} card${n === 1 ? "" : "s"}` : "empty";
+  $("#hand-title-count").textContent = countLabel + (clarCount ? ` · ${clarCount} clarifier${clarCount === 1 ? "" : "s"}` : "");
   $("#hand-copy").disabled = !n;
   $("#hand-clear").disabled = !n;
   syncControls();
@@ -649,10 +836,9 @@ function renderHand() {
   const intro = total
     ? `<p class="spread-blurb"><b>${spread.name}.</b> ${spread.blurb} Cards fill the positions in order.</p>`
     : "";
-  const healthNote =
-    state.ctx === "health"
-      ? `<p class="health-note">Health readings are symbolic reflections on wellbeing, not medical advice.</p>`
-      : "";
+  const healthNote = state.ctx.includes("health")
+    ? `<p class="health-note">Health readings are symbolic reflections on wellbeing, not medical advice.</p>`
+    : "";
 
   if (!n && !total) {
     body.innerHTML =
@@ -668,12 +854,12 @@ function renderHand() {
     main = layoutHTML(spread);
     if (extras.length) {
       main += `<h3 class="section-h">Extra cards</h3><ol class="hand-list" start="${total + 1}">${extras
-        .map(({ h, i }) => handRowHTML(h, i, spread))
+        .map(({ h, i }) => entryRowsHTML(h, i, spread))
         .join("")}</ol>`;
     }
     if (inSpread) {
       main += `<h3 class="section-h">Readings</h3><ol class="hand-list">${state.hand
-        .map((h, i) => (i < total && h ? handRowHTML(h, i, spread) : ""))
+        .map((h, i) => (i < total && h ? entryRowsHTML(h, i, spread) : ""))
         .join("")}</ol>`;
     }
   } else {
@@ -681,24 +867,24 @@ function renderHand() {
     const len = Math.max(state.hand.length, total);
     for (let i = 0; i < len; i++) {
       const h = state.hand[i];
-      if (h) rows.push(handRowHTML(h, i, spread));
+      if (h) rows.push(entryRowsHTML(h, i, spread));
       else if (i < total) rows.push(emptySlotRowHTML(i, spread.positions[i]));
     }
     main = `<ol class="hand-list">${rows.join("")}</ol>`;
   }
 
   let tally = "";
-  if (n && state.hand.some((h) => h && ynFor(CARD_BY_ID.get(h.id), h.rev))) {
+  if (cards.length && cards.some((h) => ynFor(CARD_BY_ID.get(h.id), h.rev))) {
     const t = ynTally();
     tally =
       `<p class="tally"><span class="muted">Yes/no lean:</span> ` +
       `<span class="yn yn-yes">${t.yes} yes</span> <span class="yn yn-no">${t.no} no</span> <span class="yn yn-maybe">${t.maybe} maybe</span></p>`;
   }
 
-  const combos = findCombos(state.hand.filter(Boolean));
+  const combos = findCombos(cards);
   const comboBlock = combos.length
     ? `<section class="hand-combos"><h3>Combinations in this reading</h3><div class="combo-list">${combos.map((c) => comboHTML(c, false)).join("")}</div></section>`
-    : n > 1
+    : cards.length > 1
       ? `<section class="hand-combos"><h3>Combinations in this reading</h3><p class="muted">None of the known combinations appear in this hand.</p></section>`
       : "";
 
@@ -707,6 +893,7 @@ function renderHand() {
 
 function openHand() {
   state.pendingSlot = null;
+  state.pendingClarifier = null;
   renderHand();
   const d = $("#hand-dialog");
   if (!d.open) d.showModal();
@@ -716,8 +903,19 @@ function fillEmptySlot(i) {
   const pos = currentSpread().positions[i];
   if (!pos) return;
   state.pendingSlot = i;
+  state.pendingClarifier = null;
   $("#hand-dialog").close();
   toast(`Pick a card for: ${pos.name}`);
+}
+
+function startClarifier(i) {
+  const entry = state.hand[i];
+  if (!entry) return;
+  state.pendingClarifier = i;
+  state.pendingSlot = null;
+  $("#hand-dialog").close();
+  const pos = currentSpread().positions[i];
+  toast(`Pick a clarifier for ${pos ? pos.name : "this card"}`);
 }
 
 /* ---------- detail dialog ---------- */
@@ -761,11 +959,32 @@ function renderDetail() {
     ? `<div class="yn-row"><span>Upright ${ynBadge(card, false)}</span><span>Reversed ${ynBadge(card, true)}</span></div>`
     : "";
   const reflect = card.extra ? `<h3>Reflect</h3><p class="ask">${card.extra.question}</p>` : "";
-  const ctxLabel = state.ctx === "general" ? "" : ` <small>${CONTEXTS.find((c) => c.id === state.ctx).label}</small>`;
-  const healthNote =
-    state.ctx === "health"
-      ? `<p class="health-note">Health readings are symbolic reflections on wellbeing, not medical advice.</p>`
-      : "";
+  const contexts = activeContexts();
+  const showCombined = contexts.length > 1 && state.combined;
+  const perContext =
+    contexts.length === 1
+      ? `<h3>Upright${contexts[0].id === "general" ? "" : ` <small>${contexts[0].label}</small>`}</h3>` +
+        `<p>${meaningFor(card, false, contexts[0].id)}</p>` +
+        `<h3>Reversed${contexts[0].id === "general" ? "" : ` <small>${contexts[0].label}</small>`}</h3>` +
+        `<p>${meaningFor(card, true, contexts[0].id)}</p>`
+      : contexts
+          .map(
+            (ctx) =>
+              `<section class="ctx-block">` +
+              `<h3>${ctx.label}</h3>` +
+              `<p><span class="ctx-orient">Upright</span> ${meaningFor(card, false, ctx.id)}</p>` +
+              `<p><span class="ctx-orient">Reversed</span> ${meaningFor(card, true, ctx.id)}</p>` +
+              `</section>`
+          )
+          .join("");
+  const combinedBlock = showCombined
+    ? `<section class="ctx-block combined-block"><h3>Combined summary</h3>` +
+      `<p><span class="ctx-orient">Upright</span> ${combinedFor(card, false)}</p>` +
+      `<p><span class="ctx-orient">Reversed</span> ${combinedFor(card, true)}</p></section>`
+    : "";
+  const healthNote = contexts.some((c) => c.id === "health")
+    ? `<p class="health-note">Health readings are symbolic reflections on wellbeing, not medical advice.</p>`
+    : "";
 
   $("#detail-body").innerHTML =
     `<div class="detail-card">${faceHTML(card)}</div>` +
@@ -773,8 +992,8 @@ function renderDetail() {
     `<p class="eyebrow">${cardCategory(card)}${card.corr ? ` · ${card.corr}` : ""}</p>` +
     `<h2>${card.name}</h2>` +
     `<ul class="chips kw-chips">${card.keywords.map((k) => `<li class="chip static">${k}</li>`).join("")}</ul>` +
-    `<h3>Upright${ctxLabel}</h3><p>${meaningFor(card, false)}</p>` +
-    `<h3>Reversed${ctxLabel}</h3><p>${meaningFor(card, true)}</p>` +
+    combinedBlock +
+    perContext +
     healthNote +
     (yn ? `<h3>Yes / no</h3>${yn}` : "") +
     reflect +
@@ -813,10 +1032,16 @@ document.addEventListener("click", (e) => {
   if (art) return setArt(art.dataset.art);
 
   const ctx = t.closest("[data-ctx]");
-  if (ctx) return setCtx(ctx.dataset.ctx);
+  if (ctx) return toggleCtx(ctx.dataset.ctx);
+
+  const combined = t.closest("[data-combined]");
+  if (combined) return setCombined(!state.combined);
 
   const view = t.closest("[data-view]");
   if (view) return setView(view.dataset.view);
+
+  const clarifier = t.closest("[data-clarifier]");
+  if (clarifier) return startClarifier(Number(clarifier.dataset.clarifier));
 
   const empty = t.closest("[data-empty]");
   if (empty) return fillEmptySlot(Number(empty.dataset.empty));
@@ -824,7 +1049,7 @@ document.addEventListener("click", (e) => {
   const open = t.closest("[data-open]");
   if (open) {
     // from the hand dialog, browse through the hand; otherwise the visible list
-    const list = open.dataset.from === "hand" ? state.hand.filter(Boolean).map((h) => h.id) : null;
+    const list = open.dataset.from === "hand" ? handCards().map((h) => h.id) : null;
     openDetail(open.dataset.open, list);
     return;
   }

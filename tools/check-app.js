@@ -20,6 +20,7 @@ const SCRIPTS = [
   "js/extra/minor-wands-cups.js",
   "js/extra/minor-swords-pentacles.js",
   "js/extra/health.js",
+  "js/extra/combined.js",
   "js/spreads.js",
   "js/combos.js",
   "js/app.js",
@@ -105,7 +106,7 @@ const ctx = vm.createContext({
 
 const exported = vm.runInContext(
   SCRIPTS.map(read).join("\n") +
-    "\n;({ CARDS, CARD_BY_ID, EXTRA, SPREADS, SPREAD_BY_ID, COMBOS, state, toggleCard, setSpread, fillEmptySlot, moveInHand, handAsText, setCtx, setArt, setView, meaningFor, findCombos, matchesQuery, visibleCardIds })",
+    "\n;({ CARDS, CARD_BY_ID, EXTRA, SPREADS, SPREAD_BY_ID, COMBOS, state, toggleCard, setSpread, fillEmptySlot, moveInHand, handAsText, setCtx, toggleCtx, setCombined, setArt, setView, meaningFor, meaningsFor, combinedFor, findCombos, matchesQuery, visibleCardIds, activeContexts, handCards, findHandEntry, handCount, startClarifier, ynTally, flipInHand })",
   ctx,
   { filename: "app-bundle.js" }
 );
@@ -124,12 +125,23 @@ const {
   moveInHand,
   handAsText,
   setCtx,
+  toggleCtx,
+  setCombined,
   setArt,
   setView,
   meaningFor,
+  meaningsFor,
+  combinedFor,
   findCombos,
   matchesQuery,
   visibleCardIds,
+  activeContexts,
+  handCards,
+  findHandEntry,
+  handCount,
+  startClarifier,
+  ynTally,
+  flipInHand,
 } = exported;
 
 const problems = [];
@@ -148,13 +160,14 @@ check(Array.isArray(state.hand), "state.hand is not an array");
 check(SPREAD_BY_ID.has(state.spread), `invalid default spread: ${state.spread}`);
 check(["art", "symbols"].includes(state.art), `invalid default art: ${state.art}`);
 check(["list", "layout"].includes(state.view), `invalid default view: ${state.view}`);
-check(["general", "love", "career", "health"].includes(state.ctx), `invalid default context: ${state.ctx}`);
+check(Array.isArray(state.ctx) && state.ctx.includes("general"), `invalid default context: ${state.ctx}`);
 
 /* ---------- richer content ---------- */
 
 for (const c of CARDS) {
   const e = EXTRA[c.id];
   check(e && Array.isArray(e.health) && e.health.length === 2, `missing health text: ${c.id}`);
+  check(e && Array.isArray(e.combined) && e.combined.length === 2, `missing combined text: ${c.id}`);
   check(e && Array.isArray(e.love) && e.love.length === 2, `missing love text: ${c.id}`);
   check(e && Array.isArray(e.career) && e.career.length === 2, `missing career text: ${c.id}`);
   check(e && typeof e.question === "string" && e.question, `missing question: ${c.id}`);
@@ -251,12 +264,64 @@ check(text.includes("(reversed)"), "handAsText missing reversed marker");
 check(text.includes("Combinations:"), "handAsText missing combinations");
 
 setCtx("health");
-check(state.ctx === "health", "setCtx health failed");
-const health = meaningFor(CARD_BY_ID.get("fool"), false);
+check(state.ctx.join(",") === "health", "setCtx health failed");
+const health = meaningFor(CARD_BY_ID.get("fool"), false, "health");
 check(health === EXTRA.fool.health[0], "health context did not select health text");
 const healthText = handAsText();
 check(healthText.includes("Context: Health"), "health context missing from copied text");
 check(healthText.includes("not medical advice"), "health disclaimer missing from copied text");
+
+// Multi-context selection + optional combined summary.
+setCtx("general");
+toggleCtx("love");
+check(state.ctx.join(",") === "general,love", `multi-context failed: ${state.ctx}`);
+check(activeContexts().length === 2, "activeContexts should return two contexts");
+check(meaningsFor(CARD_BY_ID.get("fool"), false).length === 2, "meaningsFor should return two texts");
+setCombined(true);
+check(combinedFor(CARD_BY_ID.get("fool"), false) === EXTRA.fool.combined[0], "combined summary did not use the combined text");
+const multiText = handAsText();
+check(multiText.includes("Context: General, Love"), "multi-context header missing");
+check(multiText.includes("Combined:"), "combined summary missing from copied text");
+setCombined(false);
+const noCombinedText = handAsText();
+check(!noCombinedText.includes("Combined:"), "combined summary should be optional");
+setCtx("general");
+
+/* ---------- clarifiers ---------- */
+
+state.hand = [];
+state.spread = "three";
+state.pendingSlot = null;
+state.pendingClarifier = null;
+toggleCard("death");
+check(handCount() === 1 && state.hand[0].id === "death", "clarifier base add failed");
+startClarifier(0);
+check(state.pendingClarifier === 0, "startClarifier did not record the entry");
+toggleCard("tower");
+check(state.hand[0].clarifier && state.hand[0].clarifier.id === "tower", "clarifier add failed");
+check(handCount() === 1, "clarifier should not increase the position count");
+check(handCards().length === 2, "handCards should include the clarifier");
+check(findHandEntry("tower") && findHandEntry("tower").clarifier, "findHandEntry should find the clarifier");
+flipInHand("tower");
+check(state.hand[0].clarifier.rev === true, "clarifier flip failed");
+const tally = ynTally();
+check(tally.yes + tally.no + tally.maybe === 2, "tally should include the clarifier");
+const clarText = handAsText();
+check(clarText.includes("Clarifier: The Tower"), "clarifier missing from copied text");
+check(clarText.includes("Combinations:"), "clarifier combination missing from copied text");
+toggleCard("tower");
+check(!state.hand[0].clarifier, "clarifier removal failed");
+check(handCount() === 1 && !findHandEntry("tower"), "clarifier removal should keep the primary");
+startClarifier(0);
+toggleCard("tower");
+toggleCard("death");
+check(handCount() === 0 && !findHandEntry("tower"), "removing the primary should remove its clarifier");
+state.hand = [{ id: "death", rev: false }];
+state.pendingClarifier = null;
+startClarifier(0);
+toggleCard("death");
+check(!state.hand[0].clarifier, "a card cannot clarify itself");
+state.pendingClarifier = null;
 
 setArt("symbols");
 check(state.art === "symbols", "setArt failed");

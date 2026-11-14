@@ -12,10 +12,11 @@ This project was built with AI assistance. The code, card interpretations, and l
 
 - **All 78 cards:** Major Arcana plus Wands, Cups, Swords and Pentacles, with upright and reversed meanings and keywords.
 - **Artwork or symbols:** toggle between the public-domain 1909 Rider–Waite–Smith scans and the original CSS/SVG faces (`v`). Artwork is small WebP and lazy-loaded.
-- **Reading contexts:** General, Love, Work & money and Health (`c` cycles). Each card has context-specific upright and reversed text.
+- **Reading contexts:** General, Love, Work & money and Health. The context buttons are multi-select for mixed questions; `c` cycles through single contexts. When more than one context is active, an optional **Combined summary** blends the different life areas.
+- **Clarifiers / double draws:** add a second card to any hand position when the first card feels stubborn. Clarifiers have their own meaning, orientation and yes/no leaning, and count toward combinations and the tally.
 - **Yes / no leanings:** every card carries a yes, no or maybe leaning, with a tally in the hand.
 - **Spreads:** Free hand, Single card, Past · Present · Future, Yes / No, Situation · Challenge · Advice, Relationship, Horseshoe and Celtic Cross. Cards fill positions in order, or click an empty position to choose a card for it.
-- **Hand modal:** flip cards to reversed, reorder them, remove them, fill an empty position, or copy the reading as text.
+- **Hand modal:** flip cards to reversed, reorder them, remove them, fill an empty position, attach a clarifier, or copy the reading as text.
 - **Combinations:** 42 authored pairs and triples plus automatic pattern checks (repeated ranks, court-heavy, major-heavy, suit-dominant, reversal-heavy). Active combinations appear in the hand.
 - **Offline / PWA:** `manifest.webmanifest` and `sw.js` cache the app shell and artwork after the first visit.
 - **Persistence:** the hand, spread, art mode, context and view are saved in `localStorage`.
@@ -51,7 +52,7 @@ The app uses relative paths, so it also works from the default `https://tmaxx.gi
 | `←` `→` | Previous or next card (card view) |
 | `a` | Add or remove the open card |
 | `v` | Toggle artwork / symbols |
-| `c` | Cycle reading context |
+| `c` | Cycle single reading context (buttons allow multiple) |
 | `Esc` | Close dialog |
 
 ## Project layout
@@ -61,7 +62,7 @@ The app uses relative paths, so it also works from the default `https://tmaxx.gi
 | `index.html` | App shell, dialogs, script order |
 | `css/style.css` | Dark/gold theme, card faces, spread grid, dialogs |
 | `js/data.js` | 78 cards, suits, ranks, `EXTRA` registry |
-| `js/extra/*.js` | Love/career/question/yes-no content; `health.js` has health readings |
+| `js/extra/*.js` | Love/career/question/yes-no content; `health.js` has health readings; `combined.js` has blended summaries |
 | `js/spreads.js` | Spread definitions and grid positions |
 | `js/combos.js` | Authored combinations and pattern rules |
 | `js/app.js` | UI, state and event handling |
@@ -73,12 +74,12 @@ The app uses relative paths, so it also works from the default `https://tmaxx.gi
 ## Editing content
 
 - `js/data.js`: card text, keywords and suit blurbs.
-- `js/extra/*.js`: each card's `EXTRA` entry has `love`, `career`, `health` (each `[upright, reversed]`), `question` and `yn` (`["yes"|"no"|"maybe", ...]`).
+- `js/extra/*.js`: each card's `EXTRA` entry has `love`, `career`, `health` and `combined` (each `[upright, reversed]`), `question` and `yn` (`["yes"|"no"|"maybe", ...]`).
 - `js/spreads.js`: the `SPREADS` array. Each position has a name, hint, grid column/row, and an optional `rot` for crossing cards.
 - `js/combos.js`: the `COMBOS` array. Each entry lists card ids, a kind (`good`, `warn` or `mixed`), a name and a text. Pattern rules are in `findPatterns`.
 - `css/style.css`: palette variables are at the top.
 
-`state.hand` is an array of `{ id, rev }` objects in spread-position order. A `null` entry means an empty spread position. `localStorage` keys are namespaced under `arcana.*`.
+`state.hand` is an array of `{ id, rev, clarifier? }` objects in spread-position order. A `null` entry means an empty spread position; a `clarifier` is an optional `{ id, rev }` second card attached to that position. `localStorage` keys are namespaced under `arcana.*`.
 
 ## Development
 
