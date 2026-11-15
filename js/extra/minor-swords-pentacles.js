@@ -22,7 +22,7 @@ Object.assign(EXTRA, {
       "A long indecision ends as information emerges, though overthinking and anxiety may still cloud the final money decision.",
     ],
     question: "What am I refusing to look at because choosing would cost me something?",
-    yn: ["maybe", "maybe"],
+    yn: ["maybe", "yes"],
   },
   "swords-3": {
     love: [
@@ -46,7 +46,7 @@ Object.assign(EXTRA, {
       "Burnout is ignored or restlessness pulls you back to work too soon, leaving stagnation and exhaustion unresolved.",
     ],
     question: "What would real rest look like for me right now, and what stops me taking it?",
-    yn: ["maybe", "maybe"],
+    yn: ["maybe", "no"],
   },
   "swords-5": {
     love: [
@@ -75,7 +75,7 @@ Object.assign(EXTRA, {
   "swords-7": {
     love: [
       "Someone is being evasive, keeping secrets or acting behind your back, or you are avoiding honest accountability yourself.",
-      "A secret comes out or conscience wins, and confession becomes possible, though self-deception may still colour the story you tell.",
+      "A secret comes out or conscience wins, and confession becomes possible, though self-deception may still color the story you tell.",
     ],
     career: [
       "Watch for office politics, a sneaky shortcut or someone taking credit, and use strategy rather than open confrontation.",
@@ -150,7 +150,7 @@ Object.assign(EXTRA, {
       "Coldness, sarcasm or bitter past hurt keeps you guarded, and a sharp tongue pushes away the closeness you want.",
     ],
     career: [
-      "Clear, unbiased judgement and direct communication make you a trusted advisor who can see through nonsense and decide fairly.",
+      "Clear, unbiased judgment and direct communication make you a trusted advisor who can see through nonsense and decide fairly.",
       "Harsh criticism, aloofness or a cynical attitude alienates colleagues, so temper your precision with a little warmth.",
     ],
     question: "How can I stay honest and keep my boundaries without closing my heart?",
@@ -162,7 +162,7 @@ Object.assign(EXTRA, {
       "A controlling or emotionally cold partner uses logic as a weapon, dismissing feelings and dominating the relationship.",
     ],
     career: [
-      "Authority, strategic thinking and ethical judgement help you lead, analyse contracts and make sound, well-reasoned decisions.",
+      "Authority, strategic thinking and ethical judgment help you lead, analyze contracts and make sound, well-reasoned decisions.",
       "Abuse of power, manipulation or rigid, cold-hearted rules damage morale, so question whether your authority serves fairness.",
     ],
     question: "Are my decisions guided by fair principle, or by the need to be right?",
@@ -187,7 +187,7 @@ Object.assign(EXTRA, {
     ],
     career: [
       "You manage several jobs, bills or priorities with adaptability, keeping everything moving even when circumstances keep shifting.",
-      "Disorganisation, overcommitment or financial juggling becomes overwhelming, and something must be dropped before it all falls.",
+      "Disorganization, overcommitment or financial juggling becomes overwhelming, and something must be dropped before it all falls.",
     ],
     question: "Which of the things I am juggling can I put down to stay steady?",
     yn: ["maybe", "no"],
@@ -198,7 +198,7 @@ Object.assign(EXTRA, {
       "Lack of teamwork or effort leaves a partnership uneven, with one person carrying the load and appreciation missing.",
     ],
     career: [
-      "Skilled collaboration is recognised, and your quality craftsmanship and teamwork earn respect and progress on a shared project.",
+      "Skilled collaboration is recognized, and your quality craftsmanship and teamwork earn respect and progress on a shared project.",
       "Poor cooperation, shoddy workmanship or ignored input leads to mediocre results and friction within the team.",
     ],
     question: "What skill do I bring to this shared effort, and whose help should I welcome?",
@@ -231,11 +231,11 @@ Object.assign(EXTRA, {
   "pentacles-6": {
     love: [
       "Giving and receiving are balanced and generous, and each partner offers care, time and support without keeping score.",
-      "Giving becomes one-sided or comes with strings attached, and love turns into a ledger of debts and favours.",
+      "Giving becomes one-sided or comes with strings attached, and love turns into a ledger of debts and favors.",
     ],
     career: [
       "A fair raise, loan, bonus or act of charity flows, and generosity and fair exchange strengthen your professional standing.",
-      "Debt, unequal pay or conditional favours create imbalance, so check who holds power in the arrangement before agreeing.",
+      "Debt, unequal pay or conditional favors create imbalance, so check who holds power in the arrangement before agreeing.",
     ],
     question: "Is the giving and receiving in this situation honestly balanced, or is someone keeping score?",
     yn: ["yes", "no"],

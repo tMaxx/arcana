@@ -70,7 +70,7 @@ const MAJOR_DATA = [
     "Order, discipline and protection. Build solid foundations, take responsibility and lead with clear rules.",
     "Rigidity, domination or lack of control. Authority that is abused or missing altogether."],
   ["hierophant", "The Hierophant", "♉", "tradition, conformity, spiritual guidance, institutions",
-    "Established wisdom, shared beliefs and mentorship. Learn from tradition, or commit within a recognised structure.",
+    "Established wisdom, shared beliefs and mentorship. Learn from tradition, or commit within a recognized structure.",
     "Rebellion, nonconformity, restrictive dogma. Question received rules and find your own path."],
   ["lovers", "The Lovers", "♊", "love, union, alignment, choices",
     "A deep connection and a meaningful choice. Values aligned with action; harmony between partners or within yourself.",
@@ -85,11 +85,11 @@ const MAJOR_DATA = [
     "Withdraw to seek truth within. A period of reflection and soul-searching, or a wise guide holding a lantern.",
     "Isolation, loneliness, withdrawal taken too far, or refusing guidance."],
   ["wheel-of-fortune", "Wheel of Fortune", "♃", "cycles, fate, turning point, luck",
-    "Life turns. A change of fortune, often favourable and beyond your control. Embrace the cycle.",
+    "Life turns. A change of fortune, often favorable and beyond your control. Embrace the cycle.",
     "Bad luck, resistance to change, broken cycles. Setbacks that carry a lesson."],
   ["justice", "Justice", "♎", "fairness, truth, cause and effect, law",
     "Honest accountability. Decisions have consequences; truth and fairness prevail and legal matters resolve.",
-    "Unfairness, dishonesty, dodging accountability. Bias clouds judgement."],
+    "Unfairness, dishonesty, dodging accountability. Bias clouds judgment."],
   ["hanged-man", "The Hanged Man", "♆", "surrender, pause, new perspective, sacrifice",
     "Suspension and letting go. Pause, release control and see the situation from a new angle.",
     "Stalling, needless sacrifice, resistance. Delay with no insight gained."],
@@ -100,7 +100,7 @@ const MAJOR_DATA = [
     "Blend and balance. Patience, moderation and healing bring a steady, harmonious flow.",
     "Imbalance, excess, impatience, discord."],
   ["devil", "The Devil", "♑", "bondage, shadow, temptation, materialism",
-    "Attachments and addictions that bind. Recognise the chains, often worn loosely, that you have placed on yourself.",
+    "Attachments and addictions that bind. Recognize the chains, often worn loosely, that you have placed on yourself.",
     "Breaking free and reclaiming power; or deeper entanglement and denial."],
   ["tower", "The Tower", "♂", "upheaval, sudden change, revelation, collapse",
     "Sudden disruption topples false foundations. Shocking but liberating: the truth breaks through.",
@@ -114,11 +114,11 @@ const MAJOR_DATA = [
   ["sun", "The Sun", "☉", "joy, success, vitality, clarity",
     "Radiant positivity. Success, warmth, confidence and clarity: a clear and happy outcome.",
     "Temporary clouds, dimmed optimism, overconfidence. Joy delayed rather than denied."],
-  ["judgement", "Judgement", "♇", "reckoning, rebirth, calling, absolution",
+  ["judgement", "Judgment", "♇", "reckoning, rebirth, calling, absolution",
     "A wake-up call. Reflect, forgive and answer your calling; weigh the past to rise renewed.",
-    "Self-doubt, harsh self-judgement, ignoring the call."],
+    "Self-doubt, harsh self-judgment, ignoring the call."],
   ["world", "The World", "♄", "completion, integration, achievement, wholeness",
-    "A cycle completes in fulfilment. Accomplishment, travel and integration; you are ready for the next chapter.",
+    "A cycle completes in fulfillment. Accomplishment, travel and integration; you are ready for the next chapter.",
     "Unfinished business, lack of closure, shortcuts. Almost there, but not yet."],
 ];
 
@@ -136,14 +136,14 @@ const MINOR_DATA = {
       "Delays, obstacles, lack of foresight, frustration."],
     ["celebration, home, harmony, milestone",
       "Joyous celebration, stability, homecoming, a milestone achieved.",
-      "Instability, tension at home, a cancelled celebration, lack of support."],
+      "Instability, tension at home, a canceled celebration, lack of support."],
     ["conflict, competition, tension, rivalry",
       "Clashing egos and petty competition. Chaotic, but it can sharpen your skills.",
       "Avoiding conflict, resolution found, or conflict turned dirty and inward."],
     ["victory, recognition, pride, success",
       "Public recognition and triumph. Confidence from well-earned success.",
       "Fall from grace, ego, lack of recognition, a hollow success."],
-    ["defence, perseverance, standing ground, challenge",
+    ["defense, perseverance, standing ground, challenge",
       "Defend your position from the higher ground. Stay firm against opposition.",
       "Overwhelmed, giving up, defensiveness, yielding too soon."],
     ["speed, movement, news, momentum",
@@ -163,8 +163,8 @@ const MINOR_DATA = {
       "Haste, scattered energy, anger, delays, burnout."],
     ["confidence, warmth, charisma, determination",
       "Magnetic, courageous and independent. Leads with warmth and vibrant confidence.",
-      "Jealousy, selfishness, demanding behaviour, shaken confidence."],
-    ["vision, leadership, boldness, honour",
+      "Jealousy, selfishness, demanding behavior, shaken confidence."],
+    ["vision, leadership, boldness, honor",
       "A visionary leader. Takes charge with charisma and decisive creativity.",
       "Domineering, impulsive, overbearing, ruthless ambition."],
   ],
@@ -191,19 +191,19 @@ const MINOR_DATA = {
       "Many tempting options, some of them illusory. Daydreams must be grounded in a decision.",
       "Clarity, a decision made, a reality check; or overwhelm and scattered focus."],
     ["walking away, disillusion, seeking meaning, withdrawal",
-      "Deliberately leaving behind what no longer fulfils you in search of something deeper.",
+      "Deliberately leaving behind what no longer fulfills you in search of something deeper.",
       "Fear of leaving, aimless drifting, staying where you are unfulfilled."],
     ["wishes granted, contentment, satisfaction, gratitude",
       "The wish card. Emotional and material satisfaction: enjoy your hard-won comfort.",
       "Smugness, dissatisfaction, indulgence, hollow wishes."],
-    ["harmony, family, fulfilment, alignment",
-      "Lasting emotional fulfilment. A happy home, family and deep contentment.",
+    ["harmony, family, fulfillment, alignment",
+      "Lasting emotional fulfillment. A happy home, family and deep contentment.",
       "Broken family, misaligned values, discord at home."],
     ["creativity, sensitivity, intuition, messages of love",
       "A dreamy, sensitive messenger. Creative inspiration, a heartfelt invitation or news.",
       "Emotional immaturity, moodiness, creative blocks, disappointing news."],
     ["romance, charm, imagination, invitation",
-      "The romantic idealist. Offers, proposals, and following the heart.",
+      "The romantic idealizt. Offers, proposals, and following the heart.",
       "Unrealistic, moody, jealous. Charm that hides insincerity."],
     ["compassion, calm, emotional security, intuition",
       "Nurturing, intuitive and emotionally mature. Compassion with healthy boundaries.",
@@ -215,7 +215,7 @@ const MINOR_DATA = {
   swords: [
     ["clarity, truth, breakthrough, justice",
       "A breakthrough of mental clarity. Truth cuts through confusion; a decisive new idea.",
-      "Confusion, brutality, clouded judgement, misused words."],
+      "Confusion, brutality, clouded judgment, misused words."],
     ["indecision, stalemate, blocked emotions, denial",
       "A difficult choice avoided; a blindfolded standoff. A truce, or avoidance.",
       "Indecision released, information revealed; or anxiety and confusion."],
@@ -250,7 +250,7 @@ const MINOR_DATA = {
       "Charges forward with ideas and conviction. Fast, direct, perhaps blunt.",
       "Reckless, tactless, scattered, aggressive or unfocused."],
     ["clear mind, independence, directness, perception",
-      "Sharp, honest and independent. Unbiased judgement and clear boundaries.",
+      "Sharp, honest and independent. Unbiased judgment and clear boundaries.",
       "Cold, bitter, harsh criticism, cruelty, or being overly guarded."],
     ["intellectual power, authority, truth, ethics",
       "Master of logic and truth. Fair, analytical, commands through reason.",
@@ -262,9 +262,9 @@ const MINOR_DATA = {
       "A missed opportunity, scarcity, poor planning, a bad investment."],
     ["balance, adaptability, juggling, priorities",
       "Juggling priorities with grace. Flexibility through changing circumstances.",
-      "Overwhelmed, disorganised, financial disarray."],
+      "Overwhelmed, disorganized, financial disarray."],
     ["teamwork, craft, collaboration, skill",
-      "Skilled collaboration. Quality work, recognised and built together.",
+      "Skilled collaboration. Quality work, recognized and built together.",
       "Poor teamwork, mediocrity, lack of initiative."],
     ["security, control, saving, possessiveness",
       "Holding tight to resources. Stability and security, or clutching too hard.",
@@ -282,7 +282,7 @@ const MINOR_DATA = {
       "Dedicated practice. Steady craft and improving skill.",
       "Perfectionism, lack of focus, uninspired repetitive work."],
     ["luxury, independence, self-sufficiency, refinement",
-      "Self-made comfort and independence. Enjoy the fruits of your labour.",
+      "Self-made comfort and independence. Enjoy the fruits of your labor.",
       "Overworking, superficiality, financial dependence, living beyond your means."],
     ["legacy, wealth, family, inheritance",
       "Lasting wealth and family security. A legacy built over generations.",
@@ -346,6 +346,15 @@ SUIT_ORDER.forEach((suit) => {
 const CARD_BY_ID = new Map(CARDS.map((c) => [c.id, c]));
 
 /* Richer per-card content, filled in by js/extra/*.js (keyed by card id).
- * Shape: { love: [upright, reversed], career: [upright, reversed],
- *          question: string, yn: [upright, reversed] }  (yn: "yes" | "no" | "maybe") */
+ * Shape:
+ *   love / career / health: [upright, reversed]   short context meanings
+ *   combined: { "love+career" | "love+health" | "career+health" | "love+career+health": [upright, reversed] }
+ *             synthesis for a multi-context selection (general never takes part)
+ *   deep: { general | love | career | health: [upright, reversed] }   long-form readings
+ *   question: string
+ *   yn: [upright, reversed]   ("yes" | "no" | "maybe")
+ * DEEP_READINGS and COMBINED_READINGS are flat registries (card id -> same shape
+ * as EXTRA[id].deep / .combined) filled by js/extra/deep/*.js and js/extra/combined/*.js. */
 const EXTRA = {};
+const DEEP_READINGS = {};
+const COMBINED_READINGS = {};

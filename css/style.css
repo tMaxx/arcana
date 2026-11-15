@@ -589,6 +589,9 @@ dialog.modal[open] { animation: pop 0.18s ease-out; display: flex; flex-directio
 .dnd-hint { margin: -0.2rem 0 1rem; color: var(--muted); font-size: 0.82rem; }
 [data-drag] { cursor: grab; user-select: none; -webkit-touch-callout: none; }
 [data-drag]:active { cursor: grabbing; }
+[data-move] { cursor: grab; user-select: none; -webkit-touch-callout: none; }
+[data-move]:hover { box-shadow: 0 0 0 2px var(--gold-bright); }
+[data-move]:active { cursor: grabbing; }
 .is-dragging, .is-dragging * { cursor: grabbing !important; }
 .drag-ghost {
   position: fixed;
@@ -600,8 +603,10 @@ dialog.modal[open] { animation: pop 0.18s ease-out; display: flex; flex-directio
   filter: drop-shadow(0 16px 24px #000000a6);
   will-change: transform;
 }
-[data-drop] { position: relative; }
-[data-drop].drop-target { outline: 2px dashed var(--gold); outline-offset: 3px; }
+[data-drop].drop-target,
+[data-move-to].drop-target { outline: 2px dashed var(--gold); outline-offset: 3px; }
+/* moving a card swaps positions rather than clarifying */
+.is-moving [data-move-to].drop-target { outline-style: solid; outline-color: var(--violet); }
 [data-drop].drop-target .mini {
   box-shadow: var(--frame), 0 0 18px color-mix(in srgb, var(--gold) 45%, transparent);
 }

@@ -100,7 +100,7 @@ Object.assign(EXTRA, {
     love: ["A sudden revelation, breakup or shock shatters illusions in the relationship, painfully clearing away what was never truly stable.", "You narrowly avoid disaster or cling to a crumbling relationship, and delaying the inevitable upheaval only prolongs the pain."],
     career: ["A sudden layoff, restructuring or collapse of plans upends your position, forcing you to rebuild on more honest foundations.", "You dodge a looming crisis or resist unavoidable change at work, and postponed upheaval grows more disruptive the longer it is ignored."],
     question: "Which structure in my life is built on shaky foundations I have been afraid to examine?",
-    yn: ["no", "no"],
+    yn: ["no", "maybe"],
   },
   "star": {
     love: ["Hope, healing and renewed trust restore the relationship or lead you to a gentle, honest love that feels like a quiet blessing.", "Disillusionment, lost faith or self-doubt dims romantic hope, and you may be waiting for love without believing you deserve it."],
@@ -118,10 +118,10 @@ Object.assign(EXTRA, {
     love: ["Joy, warmth and open affection fill the relationship, whether in a happy partnership, a playful new romance or a family blessed with children.", "Happiness is real but dimmed by temporary doubt, unrealistic expectations or a partner whose enthusiasm has cooled for now."],
     career: ["Success, recognition and a bright, energized outlook reward your efforts, with clear results and generous financial or professional rewards.", "Success is delayed or smaller than hoped, and overconfidence or lingering pessimism clouds a project that is basically sound."],
     question: "What brings me genuine joy, and how can I make more room for it?",
-    yn: ["yes", "yes"],
+    yn: ["yes", "maybe"],
   },
   "judgement": {
-    love: ["A moment of honest reckoning and forgiveness lets you answer a call to renew a relationship or begin love anew without old baggage.", "Harsh self-judgement, refusal to forgive or avoiding a needed reckoning keeps you repeating the same romantic patterns."],
+    love: ["A moment of honest reckoning and forgiveness lets you answer a call to renew a relationship or begin love anew without old baggage.", "Harsh self-judgment, refusal to forgive or avoiding a needed reckoning keeps you repeating the same romantic patterns."],
     career: ["A true calling, an evaluation or a career turning point invites you to rise to a new role after reflecting on your past.", "Self-doubt and ignoring your inner calling hold you back, and fear of being judged leads you to pass up a pivotal opportunity."],
     question: "What calling am I finally ready to answer, having forgiven my past self?",
     yn: ["yes", "maybe"],

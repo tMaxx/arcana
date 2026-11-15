@@ -38,12 +38,12 @@ Object.assign(EXTRA, {
   },
   "wands-4": {
     love: [
-      "Joyful celebration surrounds you, whether an engagement, wedding, housewarming or reunion, with a relationship that feels stable and publicly honoured.",
+      "Joyful celebration surrounds you, whether an engagement, wedding, housewarming or reunion, with a relationship that feels stable and publicly honored.",
       "Tension at home or a postponed celebration reveals a relationship lacking real support, with commitment and shared stability still shaky."
     ],
     career: [
       "A project reaches a happy milestone, and the team celebrates together, or you find a secure, harmonious workplace that feels like home.",
-      "A team lacks cohesion, a milestone is cancelled or delayed, and instability makes the workplace feel unwelcoming despite visible progress."
+      "A team lacks cohesion, a milestone is canceled or delayed, and instability makes the workplace feel unwelcoming despite visible progress."
     ],
     question: "What milestone have I reached that deserves celebration with the people who matter?",
     yn: ["yes", "maybe"]
@@ -54,7 +54,7 @@ Object.assign(EXTRA, {
       "You avoid a necessary argument, or resentment simmers beneath the surface, until truce comes or the quarrel turns bitter and private."
     ],
     career: [
-      "Competing colleagues and clashing ideas create a chaotic workplace, though the friction can sharpen your skills if you stay good-humoured.",
+      "Competing colleagues and clashing ideas create a chaotic workplace, though the friction can sharpen your skills if you stay good-humored.",
       "Office politics turn sly, or you dodge a needed confrontation, while a rivalry quietly ends in compromise, resolution or an exhausted truce."
     ],
     question: "Is this conflict about the real issue, or about who gets to win?",
@@ -67,7 +67,7 @@ Object.assign(EXTRA, {
     ],
     career: [
       "Hard work earns public recognition, such as a promotion, award or successful launch, and your reputation rises among colleagues.",
-      "Credit goes to someone else, or a success proves hollow, and ego or a fall from favour undermines your standing at work."
+      "Credit goes to someone else, or a success proves hollow, and ego or a fall from favor undermines your standing at work."
     ],
     question: "Am I able to accept recognition gracefully, and whose support helped me win?",
     yn: ["yes", "no"]
@@ -90,7 +90,7 @@ Object.assign(EXTRA, {
       "Mixed signals, ghosting or a whirlwind romance hits a wall, so frustration builds as messages go unanswered or plans stall."
     ],
     career: [
-      "Projects accelerate, emails and offers arrive in quick succession, and travel or fast decisions help you capitalise on a brief window.",
+      "Projects accelerate, emails and offers arrive in quick succession, and travel or fast decisions help you capitalize on a brief window.",
       "Deadlines slip, communications go astray and scattered energy causes costly errors, while a forced slowdown tests your patience at work."
     ],
     question: "What is moving fast in my life, and am I steering it deliberately?",
@@ -138,7 +138,7 @@ Object.assign(EXTRA, {
       "Impulsive passion cools fast, and a restless or hot-tempered partner leaves you wondering whether the fire was ever sincere."
     ],
     career: [
-      "You charge forward with bold energy, taking risks, travelling or changing roles quickly, and your daring and drive make things happen.",
+      "You charge forward with bold energy, taking risks, traveling or changing roles quickly, and your daring and drive make things happen.",
       "Rash decisions, scattered focus and a short temper cause delays, burnout and half-finished projects, so slow down before you crash."
     ],
     question: "Where am I rushing ahead on passion, and what might I be overlooking?",
@@ -147,7 +147,7 @@ Object.assign(EXTRA, {
   "wands-queen": {
     love: [
       "A warm, magnetic and confident partner draws others in, and you are invited to love openly, independently and with vibrant generosity.",
-      "Jealousy, possessiveness or demanding behaviour dims the warmth, as shaken confidence turns charm into attention-seeking or sulking."
+      "Jealousy, possessiveness or demanding behavior dims the warmth, as shaken confidence turns charm into attention-seeking or sulking."
     ],
     career: [
       "A charismatic, determined leader inspires the team, and you thrive by combining a confident vision with warm, practical management.",
@@ -158,7 +158,7 @@ Object.assign(EXTRA, {
   },
   "wands-king": {
     love: [
-      "A confident, honourable partner leads with charisma and generosity, and you meet someone, or act as someone, who inspires through bold devotion.",
+      "A confident, honorable partner leads with charisma and generosity, and you meet someone, or act as someone, who inspires through bold devotion.",
       "A domineering or overbearing partner insists on control, and impulsive pride or ruthless ambition overshadows care for the other person."
     ],
     career: [
@@ -171,7 +171,7 @@ Object.assign(EXTRA, {
   "cups-ace": {
     love: [
       "A new love, deep emotional connection or overflowing affection begins, and your heart opens to give and receive without reservation.",
-      "Feelings stay bottled up, a loving offer goes unrecognised, or emptiness follows a relationship that never quite filled your cup."
+      "Feelings stay bottled up, a loving offer goes unrecognized, or emptiness follows a relationship that never quite filled your cup."
     ],
     career: [
       "Work that feels emotionally meaningful appears, with creative inspiration, a heartfelt calling or a generous opportunity pouring into your path.",
@@ -199,7 +199,7 @@ Object.assign(EXTRA, {
     ],
     career: [
       "Teamwork, shared success and a supportive group celebrate a win, so collaboration and friendly networking move your work forward.",
-      "Cliques, gossip or too much socialising undermine the team, and you may feel isolated when colleagues celebrate without including you."
+      "Cliques, gossip or too much socializing undermine the team, and you may feel isolated when colleagues celebrate without including you."
     ],
     question: "Who are the people I most want to celebrate with, and have I told them?",
     yn: ["yes", "maybe"]
@@ -231,7 +231,7 @@ Object.assign(EXTRA, {
   "cups-6": {
     love: [
       "Sweet nostalgia, a reunion with an old flame or tender, innocent affection brings comfort, and kindness flows between you and a loved one.",
-      "You idealise a past relationship, cling to old memories or refuse to grow, and nostalgia blocks the love available today."
+      "You idealize a past relationship, cling to old memories or refuse to grow, and nostalgia blocks the love available today."
     ],
     career: [
       "Familiar colleagues, an old contact or a return to past work brings generosity and ease, and childlike creativity helps your current projects.",
@@ -250,7 +250,7 @@ Object.assign(EXTRA, {
       "A reality check brings clarity and a firm decision, or scattered focus and too many half-pursued dreams leave you unable to commit."
     ],
     question: "Which of my many options is real, and which is only a daydream?",
-    yn: ["maybe", "maybe"]
+    yn: ["maybe", "yes"]
   },
   "cups-8": {
     love: [
@@ -278,12 +278,12 @@ Object.assign(EXTRA, {
   },
   "cups-10": {
     love: [
-      "Lasting emotional fulfilment arrives in a loving partnership, a happy family home and shared values that make everyone feel secure.",
-      "Family discord, mismatched values or an idealised picture of domestic happiness leaves the relationship feeling fractured beneath its pleasant surface."
+      "Lasting emotional fulfillment arrives in a loving partnership, a happy family home and shared values that make everyone feel secure.",
+      "Family discord, mismatched values or an idealized picture of domestic happiness leaves the relationship feeling fractured beneath its pleasant surface."
     ],
     career: [
-      "Your work aligns with your values and supports a happy home, bringing emotional fulfilment and a harmonious, caring team.",
-      "Work and family pull in different directions, or workplace values clash with yours, leaving the promise of fulfilment out of reach."
+      "Your work aligns with your values and supports a happy home, bringing emotional fulfillment and a harmonious, caring team.",
+      "Work and family pull in different directions, or workplace values clash with yours, leaving the promise of fulfillment out of reach."
     ],
     question: "What would a truly harmonious life look like, and what small step moves me toward it?",
     yn: ["yes", "maybe"]
@@ -302,7 +302,7 @@ Object.assign(EXTRA, {
   },
   "cups-knight": {
     love: [
-      "A romantic, charming idealist arrives with a proposal, an invitation or a poetic gesture, and your heart is invited to follow.",
+      "A romantic, charming idealizt arrives with a proposal, an invitation or a poetic gesture, and your heart is invited to follow.",
       "Charm hides insincerity, or a moody dreamer promises more than they deliver, so beware jealousy and unrealistic romantic expectations."
     ],
     career: [

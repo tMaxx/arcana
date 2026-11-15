@@ -19,7 +19,7 @@ const HEALTH_READINGS = {
   ],
   "high-priestess": [
     "Quiet rest, dreams and intuition are your medicine; make space for silence and listen to what your body is telling you.",
-    "Ignoring fatigue or inner warning signs creates tension; honour your need for rest instead of pushing through.",
+    "Ignoring fatigue or inner warning signs creates tension; honor your need for rest instead of pushing through.",
   ],
   "empress": [
     "Nourishment, comfort and sensual pleasure restore you; good food, nature and gentle self-care are especially supportive.",
@@ -55,7 +55,7 @@ const HEALTH_READINGS = {
   ],
   "justice": [
     "Balance, honesty and clear boundaries support wellbeing; attend to what is fair to your body and mind.",
-    "Imbalance or self-judgement strains you; release harsh comparisons and restore fairness in your routine.",
+    "Imbalance or self-judgment strains you; release harsh comparisons and restore fairness in your routine.",
   ],
   "hanged-man": [
     "A pause is healing; surrender the need to push and let your body rest in a new perspective.",
@@ -74,7 +74,7 @@ const HEALTH_READINGS = {
     "You are beginning to break free from an unhealthy habit; withdrawal and shame need patience and support.",
   ],
   "tower": [
-    "Sudden stress or upheaval shakes your routine; prioritise safety, sleep and recovery while things settle.",
+    "Sudden stress or upheaval shakes your routine; prioritize safety, sleep and recovery while things settle.",
     "Chronic tension or a shock has unsettled you; rebuild gently rather than pushing through the rubble.",
   ],
   "star": [
@@ -91,7 +91,7 @@ const HEALTH_READINGS = {
   ],
   "judgement": [
     "An honest reckoning brings relief; forgive yourself and answer the call to a healthier way of living.",
-    "Harsh self-judgement or avoidance keeps you stuck; forgive what is past and take one concrete step forward.",
+    "Harsh self-judgment or avoidance keeps you stuck; forgive what is past and take one concrete step forward.",
   ],
   "world": [
     "A cycle of healing completes; celebrate your progress and let yourself feel whole before the next chapter.",
@@ -163,7 +163,7 @@ const HEALTH_READINGS = {
   ],
   "cups-2": [
     "Connection and mutual care restore you; spend time with someone who makes you feel seen.",
-    "Imbalance or disconnection in a relationship drains you; restore your own emotional centre first.",
+    "Imbalance or disconnection in a relationship drains you; restore your own emotional center first.",
   ],
   "cups-3": [
     "Friendship and shared joy lift your spirits; community and celebration are good medicine.",
@@ -179,14 +179,14 @@ const HEALTH_READINGS = {
   ],
   "cups-6": [
     "Nostalgia and gentle memories soothe you; reconnect with what felt safe and joyful in the past.",
-    "Living in the past or idealising it keeps you stuck; honour the memory and return to the present.",
+    "Living in the past or idealizing it keeps you stuck; honor the memory and return to the present.",
   ],
   "cups-7": [
     "Too many options and fantasies scatter your energy; ground yourself in what is real and choose one path.",
     "Confusion begins to clear; let go of illusions and act on what you actually need.",
   ],
   "cups-8": [
-    "Leaving what no longer fulfils you is a healthy act; give yourself permission to walk toward something truer.",
+    "Leaving what no longer fulfills you is a healthy act; give yourself permission to walk toward something truer.",
     "Fear of leaving or returning to an old situation keeps you stuck; examine what you are really staying for.",
   ],
   "cups-9": [
@@ -195,7 +195,7 @@ const HEALTH_READINGS = {
   ],
   "cups-10": [
     "Emotional security and family warmth support healing; lean on the people who feel like home.",
-    "Family tension or an idealised picture of harmony strains you; accept the real, imperfect support available.",
+    "Family tension or an idealized picture of harmony strains you; accept the real, imperfect support available.",
   ],
   "cups-page": [
     "Tender feelings and intuition ask for expression; creative or emotional play helps you process what you feel.",
@@ -207,7 +207,7 @@ const HEALTH_READINGS = {
   ],
   "cups-queen": [
     "Compassion and emotional wisdom steady you; trust your intuition and care for yourself as deeply as others.",
-    "Overwhelm or absorbing others' emotions drains you; set boundaries and return to your own centre.",
+    "Overwhelm or absorbing others' emotions drains you; set boundaries and return to your own center.",
   ],
   "cups-king": [
     "Emotional maturity and calm authority support you; respond rather than react, and keep your heart open.",
@@ -217,7 +217,7 @@ const HEALTH_READINGS = {
   // ---- Swords ----
   "swords-ace": [
     "Clarity cuts through confusion; name the problem honestly and make a clean, informed decision.",
-    "Mental fog or harsh self-talk clouds your judgement; rest your mind before forcing an answer.",
+    "Mental fog or harsh self-talk clouds your judgment; rest your mind before forcing an answer.",
   ],
   "swords-2": [
     "Indecision and tension keep you stuck; step away from the choice long enough to breathe and see clearly.",
@@ -268,7 +268,7 @@ const HEALTH_READINGS = {
     "Coldness or biting criticism strains you; soften the inner voice and allow warmth back in.",
   ],
   "swords-king": [
-    "Mental discipline and fair judgement support you; make decisions from principle, not fear.",
+    "Mental discipline and fair judgment support you; make decisions from principle, not fear.",
     "Rigid thinking or harsh authority creates tension; question the rule and make room for nuance.",
   ],
 
@@ -279,7 +279,7 @@ const HEALTH_READINGS = {
   ],
   "pentacles-2": [
     "Balance and adaptability keep you steady; juggle your commitments without dropping your own needs.",
-    "Overcommitment or disorganisation strains you; simplify and drop what is not essential.",
+    "Overcommitment or disorganization strains you; simplify and drop what is not essential.",
   ],
   "pentacles-3": [
     "Skill, collaboration and steady work build strength; value the craft of caring for yourself.",

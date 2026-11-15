@@ -637,6 +637,36 @@ function moveToClarifier(source, targetIndex) {
   return true;
 }
 
+/* ---------- moving a card between positions ---------- */
+
+function moveProblem(from, to) {
+  if (from === to) return "That card is already in this position";
+  if (!state.hand[from]) return "That card is no longer in the hand";
+  const total = currentSpread().positions.length || state.hand.length;
+  if (to < 0 || to >= Math.max(total, state.hand.length)) return "That position is not available";
+  return null;
+}
+
+/** Swap two hand entries; dropping onto an empty position just moves the card. */
+function moveEntry(from, to) {
+  const problem = moveProblem(from, to);
+  if (problem) {
+    toast(problem);
+    return false;
+  }
+  while (state.hand.length <= to) state.hand.push(null);
+  const card = state.hand[from];
+  const other = state.hand[to] || null;
+  state.hand[to] = card;
+  state.hand[from] = other;
+  trimHand();
+  const name = CARD_BY_ID.get(card.id).name;
+  const pos = currentSpread().positions[to];
+  toast(`${other ? "Swapped" : "Moved"} ${name}${pos ? ` to ${pos.name}` : ""}`);
+  handChanged();
+  return true;
+}
+
 function flipInHand(id) {
   const found = findHandEntry(id);
   if (!found) return;
@@ -747,11 +777,11 @@ function handRowHTML(h, i, spread) {
     : "";
   const q = c.extra ? `<p class="ask">Ask: ${c.extra.question}</p>` : "";
   return (
-    `<li class="hand-row" data-id="${c.id}" data-drop="${i}">` +
+    `<li class="hand-row" data-id="${c.id}" data-drop="${i}" data-move-to="${i}">` +
     `<button class="mini" data-open="${c.id}" data-from="hand" data-drag="p:${i}" draggable="false" title="Drag onto another card to make it a clarifier" aria-label="View ${c.name}">${faceHTML(c, h.rev)}</button>` +
     `<div class="hand-info">` +
     posLine +
-    `<h3><span class="pos">${i + 1}</span> ${c.name} <span class="orient ${h.rev ? "rev" : ""}">${h.rev ? "Reversed" : "Upright"}</span> ${ynBadge(c, h.rev)}</h3>` +
+    `<h3><span class="pos" data-move="${i}" title="Drag to move this card to another position">${i + 1}</span> ${c.name} <span class="orient ${h.rev ? "rev" : ""}">${h.rev ? "Reversed" : "Upright"}</span> ${ynBadge(c, h.rev)}</h3>` +
     `<p class="kw">${c.keywords.join(" · ")}${c.corr ? ` · <span class="corr">${c.corr}</span>` : ""}</p>` +
     meaningsHTML(c, h.rev) +
     q +
@@ -774,7 +804,7 @@ function clarifierRowHTML(h, i, spread) {
   const posLine = `<p class="posname clarifier">Clarifier${pos ? ` for ${pos.name}` : ""}</p>`;
   const q = c.extra ? `<p class="ask">Ask: ${c.extra.question}</p>` : "";
   return (
-    `<li class="hand-row clarifier-row" data-id="${c.id}" data-drop="${i}">` +
+    `<li class="hand-row clarifier-row" data-id="${c.id}" data-drop="${i}" data-move-to="${i}">` +
     `<button class="mini" data-open="${c.id}" data-from="hand" data-drag="c:${i}" draggable="false" title="Drag onto another card to move it" aria-label="View ${c.name}">${faceHTML(c, clar.rev)}</button>` +
     `<div class="hand-info">` +
     posLine +
@@ -797,7 +827,7 @@ function entryRowsHTML(h, i, spread) {
 
 function emptySlotRowHTML(i, pos) {
   return (
-    `<li class="hand-row empty-slot"><button class="slot-fill" data-empty="${i}">` +
+    `<li class="hand-row empty-slot" data-move-to="${i}"><button class="slot-fill" data-empty="${i}">` +
     `<span class="pos">${i + 1}</span><span><b>${pos.name}</b> <span class="muted">${pos.hint}</span></span>` +
     `<span class="muted">Empty · choose a card</span></button></li>`
   );
@@ -814,18 +844,18 @@ function layoutHTML(spread) {
         const c = CARD_BY_ID.get(h.id);
         const clar = h.clarifier ? CARD_BY_ID.get(h.clarifier.id) : null;
         return (
-          `<div class="slot filled${rot}" style="${at}" data-drop="${i}" title="${p.name}: ${c.name}${h.rev ? " (reversed)" : ""}${clar ? ` + clarifier ${clar.name}` : ""}">` +
+          `<div class="slot filled${rot}" style="${at}" data-drop="${i}" data-move-to="${i}" title="${p.name}: ${c.name}${h.rev ? " (reversed)" : ""}${clar ? ` + clarifier ${clar.name}` : ""}">` +
           `<button class="mini" data-open="${c.id}" data-from="hand" data-drag="p:${i}" draggable="false" aria-label="${p.name}: ${c.name}">${faceHTML(c, h.rev)}</button>` +
           (clar
             ? `<button class="mini clarifier-mini" data-open="${clar.id}" data-from="hand" data-drag="c:${i}" draggable="false" title="Clarifier: ${clar.name}" aria-label="Clarifier: ${clar.name}">${faceHTML(clar, h.clarifier.rev)}</button>`
             : "") +
-          `<span class="slot-num">${i + 1}</span>${label}` +
+          `<span class="slot-num" data-move="${i}" title="Drag to move this card to another position">${i + 1}</span>${label}` +
           (clar ? `<span class="slot-clarifier">clarifier</span>` : "") +
           `</div>`
         );
       }
       return (
-        `<button class="slot empty${rot}" style="${at}" data-empty="${i}" title="${p.name}: ${p.hint}">` +
+        `<button class="slot empty${rot}" style="${at}" data-empty="${i}" data-move-to="${i}" title="${p.name}: ${p.hint}">` +
         `<span class="slot-box"></span><span class="slot-num">${i + 1}</span>${label}</button>`
       );
     })
@@ -856,7 +886,9 @@ function renderHand() {
     ? `<p class="spread-blurb"><b>${spread.name}.</b> ${spread.blurb} Cards fill the positions in order.</p>`
     : "";
   const dragHint =
-    n > 1 ? `<p class="dnd-hint">Drag a card onto another to make it its clarifier.</p>` : "";
+    n > 1
+      ? `<p class="dnd-hint">Drag a card onto another to make it its clarifier, or drag a position number to move it.</p>`
+      : "";
   const healthNote = state.ctx.includes("health")
     ? `<p class="health-note">Health readings are symbolic reflections on wellbeing, not medical advice.</p>`
     : "";
@@ -1041,15 +1073,20 @@ function placeDragGhost(x, y) {
 }
 
 function dropAt(x, y) {
+  if (!dragState) return null;
   const el = document.elementFromPoint(x, y);
-  const row = el && el.closest("[data-drop]");
+  const moving = dragState.kind === "move";
+  const row = el && el.closest(moving ? "[data-move-to]" : "[data-drop]");
   if (!row) return null;
-  const index = Number(row.dataset.drop);
-  return { el: row, index, problem: clarifyProblem(dragState.source, index) };
+  const index = Number(moving ? row.dataset.moveTo : row.dataset.drop);
+  const problem = moving
+    ? moveProblem(dragState.source.index, index)
+    : clarifyProblem(dragState.source, index);
+  return { el: row, index, problem };
 }
 
 function highlightDrop(target) {
-  $$("[data-drop].drop-target").forEach((el) => {
+  $$(".drop-target").forEach((el) => {
     if (!target || target.problem || el !== target.el) el.classList.remove("drop-target");
   });
   if (target && !target.problem) target.el.classList.add("drop-target");
@@ -1058,7 +1095,7 @@ function highlightDrop(target) {
 function startCardDrag(x, y) {
   if (!dragPress) return;
   clearTimeout(dragPress.timer);
-  const source = dragPress.source;
+  const { kind, source } = dragPress;
   dragPress = null;
   const card = slotCard(source);
   if (!card) return;
@@ -1069,8 +1106,9 @@ function startCardDrag(x, y) {
   ghost.setAttribute("aria-hidden", "true");
   // the dialog sits in the top layer, so the ghost must live inside it
   $("#hand-dialog").appendChild(ghost);
-  dragState = { source, ghost };
+  dragState = { kind, source, ghost };
   document.body.classList.add("is-dragging");
+  document.body.classList.toggle("is-moving", kind === "move");
   placeDragGhost(x, y);
 }
 
@@ -1078,16 +1116,22 @@ function endCardDrag() {
   if (!dragState) return;
   dragState.ghost.remove();
   dragState = null;
-  document.body.classList.remove("is-dragging");
-  $$("[data-drop].drop-target").forEach((el) => el.classList.remove("drop-target"));
+  document.body.classList.remove("is-dragging", "is-moving");
+  $$(".drop-target").forEach((el) => el.classList.remove("drop-target"));
 }
 
 document.addEventListener("pointerdown", (e) => {
   if (dragPress || dragState || (e.pointerType === "mouse" && e.button !== 0)) return;
-  const handle = e.target.closest("[data-drag]");
-  if (!handle || !$("#hand-dialog").open) return;
+  if (!$("#hand-dialog").open) return;
+  // the card face makes a clarifier, the position number moves the card
+  const moveHandle = e.target.closest("[data-move]");
+  const cardHandle = moveHandle ? null : e.target.closest("[data-drag]");
+  if (!moveHandle && !cardHandle) return;
   dragPress = {
-    source: parseSlot(handle.dataset.drag),
+    kind: moveHandle ? "move" : "clarifier",
+    source: moveHandle
+      ? { index: Number(moveHandle.dataset.move), clarifier: false }
+      : parseSlot(cardHandle.dataset.drag),
     x: e.clientX,
     y: e.clientY,
     touch: e.pointerType !== "mouse",
@@ -1124,12 +1168,17 @@ document.addEventListener("pointerup", (e) => {
     return; // a plain tap: the click handler opens the card
   }
   if (!dragState) return;
+  const kind = dragState.kind;
   const source = dragState.source;
   const target = dropAt(e.clientX, e.clientY);
   endCardDrag();
   suppressClickUntil = performance.now() + 400;
   if (!target) return;
-  if (target.problem) toast(target.problem);
+  if (target.problem) {
+    toast(target.problem);
+    return;
+  }
+  if (kind === "move") moveEntry(source.index, target.index);
   else moveToClarifier(source, target.index);
 });
 

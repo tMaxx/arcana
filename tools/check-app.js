@@ -106,7 +106,7 @@ const ctx = vm.createContext({
 
 const exported = vm.runInContext(
   SCRIPTS.map(read).join("\n") +
-    "\n;({ CARDS, CARD_BY_ID, EXTRA, SPREADS, SPREAD_BY_ID, COMBOS, state, toggleCard, setSpread, fillEmptySlot, moveInHand, handAsText, setCtx, toggleCtx, setCombined, setArt, setView, meaningFor, meaningsFor, combinedFor, findCombos, matchesQuery, visibleCardIds, activeContexts, handCards, findHandEntry, handCount, moveToClarifier, clarifyProblem, ynTally, flipInHand })",
+    "\n;({ CARDS, CARD_BY_ID, EXTRA, SPREADS, SPREAD_BY_ID, COMBOS, state, toggleCard, setSpread, fillEmptySlot, moveInHand, handAsText, setCtx, toggleCtx, setCombined, setArt, setView, meaningFor, meaningsFor, combinedFor, findCombos, matchesQuery, visibleCardIds, activeContexts, handCards, findHandEntry, handCount, moveToClarifier, clarifyProblem, moveEntry, moveProblem, ynTally, flipInHand })",
   ctx,
   { filename: "app-bundle.js" }
 );
@@ -141,6 +141,8 @@ const {
   handCount,
   moveToClarifier,
   clarifyProblem,
+  moveEntry,
+  moveProblem,
   ynTally,
   flipInHand,
 } = exported;
@@ -332,6 +334,21 @@ check(!moveToClarifier({ index: 0, clarifier: false }, 1), "second clarifier sho
 toggleCard("tower");
 check(!state.hand[1].clarifier, "clarifier removal failed");
 check(handCount() === 2, "clarifier removal should keep the primary");
+
+/* ---------- moving cards between positions ---------- */
+
+state.spread = "three";
+state.hand = [
+  { id: "death", rev: false },
+  { id: "tower", rev: true, clarifier: { id: "star", rev: false } },
+];
+check(moveEntry(0, 1), "swap via moveEntry failed");
+check(state.hand[0].id === "tower" && state.hand[1].id === "death", "swap should exchange cards");
+check(state.hand[0].clarifier && state.hand[0].clarifier.id === "star", "the clarifier should travel with its card");
+check(moveEntry(1, 2), "move into an empty position failed");
+check(!state.hand[1] && state.hand[2].id === "death", "the old position should be empty after a move");
+check(moveProblem(2, 2) !== null, "moving onto itself should be rejected");
+check(!moveEntry(2, 2), "moveEntry should refuse a no-op move");
 
 setArt("symbols");
 check(state.art === "symbols", "setArt failed");

@@ -16,7 +16,7 @@ This project was built with AI assistance. The code, card interpretations, and l
 - **Clarifiers / double draws:** drag a card that is already in the hand onto another card to make it that card's clarifier. The moved card leaves its old slot empty, keeps its orientation and yes/no leaning, and counts toward combinations and the tally.
 - **Yes / no leanings:** every card carries a yes, no or maybe leaning, with a tally in the hand.
 - **Spreads:** Free hand, Single card, Past · Present · Future, Yes / No, Situation · Challenge · Advice, Relationship, Horseshoe and Celtic Cross. Cards fill positions in order, or click an empty position to choose a card for it.
-- **Hand modal:** flip cards to reversed, reorder them, remove them, fill an empty position, drag one card onto another to clarify it, or copy the reading as text.
+- **Hand modal:** flip cards to reversed, drag one card onto another to clarify it, drag a position number to move a card to another slot, remove cards, fill an empty position, or copy the reading as text.
 - **Combinations:** 42 authored pairs and triples plus automatic pattern checks (repeated ranks, court-heavy, major-heavy, suit-dominant, reversal-heavy). Active combinations appear in the hand.
 - **Offline / PWA:** `manifest.webmanifest` and `sw.js` cache the app shell and artwork after the first visit.
 - **Persistence:** the hand, spread, art mode, context and view are saved in `localStorage`.
