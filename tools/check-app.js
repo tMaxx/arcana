@@ -16,11 +16,23 @@ const read = (rel) => fs.readFileSync(path.join(ROOT, rel), "utf8");
 
 const SCRIPTS = [
   "js/data.js",
+  "js/extra/short.js",
   "js/extra/major.js",
   "js/extra/minor-wands-cups.js",
   "js/extra/minor-swords-pentacles.js",
   "js/extra/health.js",
-  "js/extra/combined.js",
+  "js/extra/deep/major-1.js",
+  "js/extra/deep/major-2.js",
+  "js/extra/deep/wands.js",
+  "js/extra/deep/cups.js",
+  "js/extra/deep/swords.js",
+  "js/extra/deep/pentacles.js",
+  "js/extra/combined/major-1.js",
+  "js/extra/combined/major-2.js",
+  "js/extra/combined/wands.js",
+  "js/extra/combined/cups.js",
+  "js/extra/combined/swords.js",
+  "js/extra/combined/pentacles.js",
   "js/spreads.js",
   "js/combos.js",
   "js/app.js",
@@ -106,7 +118,7 @@ const ctx = vm.createContext({
 
 const exported = vm.runInContext(
   SCRIPTS.map(read).join("\n") +
-    "\n;({ CARDS, CARD_BY_ID, EXTRA, SPREADS, SPREAD_BY_ID, COMBOS, state, toggleCard, setSpread, fillEmptySlot, moveInHand, handAsText, setCtx, toggleCtx, setCombined, setArt, setView, meaningFor, meaningsFor, combinedFor, findCombos, matchesQuery, visibleCardIds, activeContexts, handCards, findHandEntry, handCount, moveToClarifier, clarifyProblem, moveEntry, moveProblem, ynTally, flipInHand })",
+    "\n;({ CARDS, CARD_BY_ID, EXTRA, SPREADS, SPREAD_BY_ID, COMBOS, state, toggleCard, setSpread, fillEmptySlot, moveInHand, handAsText, setCtx, toggleCtx, setCombined, setDepth, setArt, setView, meaningFor, meaningsFor, combinedFor, combinedContexts, textFor, findCombos, matchesQuery, visibleCardIds, activeContexts, handCards, findHandEntry, handCount, moveToClarifier, clarifyProblem, moveEntry, moveProblem, ynTally, flipInHand })",
   ctx,
   { filename: "app-bundle.js" }
 );
@@ -127,11 +139,14 @@ const {
   setCtx,
   toggleCtx,
   setCombined,
+  setDepth,
   setArt,
   setView,
   meaningFor,
   meaningsFor,
   combinedFor,
+  combinedContexts,
+  textFor,
   findCombos,
   matchesQuery,
   visibleCardIds,
@@ -162,7 +177,7 @@ check(COMBOS.length === 42, `expected 42 combos, got ${COMBOS.length}`);
 check(Array.isArray(state.hand), "state.hand is not an array");
 check(SPREAD_BY_ID.has(state.spread), `invalid default spread: ${state.spread}`);
 check(["art", "symbols"].includes(state.art), `invalid default art: ${state.art}`);
-check(["list", "layout"].includes(state.view), `invalid default view: ${state.view}`);
+check(["list", "layout", "read"].includes(state.view), `invalid default view: ${state.view}`);
 check(Array.isArray(state.ctx) && state.ctx.includes("general"), `invalid default context: ${state.ctx}`);
 
 /* ---------- richer content ---------- */
@@ -170,7 +185,8 @@ check(Array.isArray(state.ctx) && state.ctx.includes("general"), `invalid defaul
 for (const c of CARDS) {
   const e = EXTRA[c.id];
   check(e && Array.isArray(e.health) && e.health.length === 2, `missing health text: ${c.id}`);
-  check(e && Array.isArray(e.combined) && e.combined.length === 2, `missing combined text: ${c.id}`);
+  check(e && e.combined && Array.isArray(e.combined["love+career"]) && e.combined["love+career"].length === 2, `missing combined text: ${c.id}`);
+  check(e && e.deep && Array.isArray(e.deep.general) && e.deep.general.length === 2, `missing deep text: ${c.id}`);
   check(e && Array.isArray(e.love) && e.love.length === 2, `missing love text: ${c.id}`);
   check(e && Array.isArray(e.career) && e.career.length === 2, `missing career text: ${c.id}`);
   check(e && typeof e.question === "string" && e.question, `missing question: ${c.id}`);
@@ -277,18 +293,42 @@ check(healthText.includes("not medical advice"), "health disclaimer missing from
 // Multi-context selection + optional combined summary.
 setCtx("general");
 toggleCtx("love");
-check(state.ctx.join(",") === "general,love", `multi-context failed: ${state.ctx}`);
-check(activeContexts().length === 2, "activeContexts should return two contexts");
-check(meaningsFor(CARD_BY_ID.get("fool"), false).length === 2, "meaningsFor should return two texts");
+toggleCtx("career");
+check(state.ctx.join(",") === "general,love,career", `multi-context failed: ${state.ctx}`);
+check(activeContexts().length === 3, "activeContexts should return three contexts");
+check(combinedContexts().length === 2, "combinedContexts should ignore general");
+check(meaningsFor(CARD_BY_ID.get("fool"), false).length === 3, "meaningsFor should return three texts");
 setCombined(true);
-check(combinedFor(CARD_BY_ID.get("fool"), false) === EXTRA.fool.combined[0], "combined summary did not use the combined text");
+check(
+  combinedFor(CARD_BY_ID.get("fool"), false) === EXTRA.fool.combined["love+career"][0],
+  "combined summary should follow the selected areas"
+);
 const multiText = handAsText();
 check(multiText.includes("Context: General, Love"), "multi-context header missing");
 check(multiText.includes("Combined:"), "combined summary missing from copied text");
 setCombined(false);
 const noCombinedText = handAsText();
 check(!noCombinedText.includes("Combined:"), "combined summary should be optional");
+
+// One area is not enough for a combined summary.
 setCtx("general");
+toggleCtx("love");
+check(combinedFor(CARD_BY_ID.get("fool"), false) === "", "combined summary needs two areas");
+setCtx("general");
+
+/* ---------- reading depth ---------- */
+
+state.spread = "free";
+state.hand = [{ id: "fool", rev: false }];
+const fool = CARD_BY_ID.get("fool");
+check(textFor(fool, false, "general") === fool.upright, "short text should be the default");
+setDepth("deep");
+check(textFor(fool, false, "general") === EXTRA.fool.deep.general[0], "deep general text not used");
+check(textFor(fool, true, "love") === EXTRA.fool.deep.love[1], "deep love reversed text not used");
+const deepText = handAsText();
+check(deepText.includes(EXTRA.fool.deep.general[0].slice(0, 40)), "deep text missing from copied reading");
+setDepth("short");
+check(textFor(fool, true, "general") === fool.reversed, "short text should come back");
 
 /* ---------- clarifiers: drag a hand card onto another ---------- */
 
@@ -354,6 +394,10 @@ setArt("symbols");
 check(state.art === "symbols", "setArt failed");
 setView("layout");
 check(state.view === "layout", "setView failed");
+setView("read");
+check(state.view === "read", "setView read failed");
+setView("list");
+check(state.view === "list", "setView list failed");
 
 /* ---------- combinations ---------- */
 

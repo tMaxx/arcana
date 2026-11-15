@@ -55,6 +55,10 @@
               <button type="button" data-ctx="health">Health</button>
             </div>
             <button class="btn combined-toggle" type="button" data-combined aria-pressed="false" hidden title="Show a combined summary for the selected contexts">Combined summary</button>
+            <div class="seg depth-seg" role="group" aria-label="Reading depth">
+              <button type="button" data-depth="short">Short</button>
+              <button type="button" data-depth="deep">Deep</button>
+            </div>
           </div>
           <button class="close" type="button" data-close aria-label="Close">✕</button>
         </div>
@@ -87,6 +91,11 @@
           <div class="seg" id="view-seg" role="group" aria-label="Hand view">
             <button type="button" data-view="list">List</button>
             <button type="button" data-view="layout">Layout</button>
+            <button type="button" data-view="read">Read</button>
+          </div>
+          <div class="seg depth-seg" id="hand-depth-seg" role="group" aria-label="Reading depth" hidden>
+            <button type="button" data-depth="short">Short</button>
+            <button type="button" data-depth="deep">Deep</button>
           </div>
           <div class="ctx-group">
             <div class="seg ctx-seg" role="group" aria-label="Reading context">
@@ -105,11 +114,23 @@
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
     <script src="js/data.js"></script>
+    <script src="js/extra/short.js"></script>
     <script src="js/extra/major.js"></script>
     <script src="js/extra/minor-wands-cups.js"></script>
     <script src="js/extra/minor-swords-pentacles.js"></script>
     <script src="js/extra/health.js"></script>
-    <script src="js/extra/combined.js"></script>
+    <script src="js/extra/deep/major-1.js"></script>
+    <script src="js/extra/deep/major-2.js"></script>
+    <script src="js/extra/deep/wands.js"></script>
+    <script src="js/extra/deep/cups.js"></script>
+    <script src="js/extra/deep/swords.js"></script>
+    <script src="js/extra/deep/pentacles.js"></script>
+    <script src="js/extra/combined/major-1.js"></script>
+    <script src="js/extra/combined/major-2.js"></script>
+    <script src="js/extra/combined/wands.js"></script>
+    <script src="js/extra/combined/cups.js"></script>
+    <script src="js/extra/combined/swords.js"></script>
+    <script src="js/extra/combined/pentacles.js"></script>
     <script src="js/spreads.js"></script>
     <script src="js/combos.js"></script>
     <script src="js/app.js"></script>

@@ -15,11 +15,23 @@ const read = (rel) => fs.readFileSync(path.join(ROOT, rel), "utf8");
 const ctx = vm.createContext({ console });
 const sources = [
   "js/data.js",
+  "js/extra/short.js",
   "js/extra/major.js",
   "js/extra/minor-wands-cups.js",
   "js/extra/minor-swords-pentacles.js",
   "js/extra/health.js",
-  "js/extra/combined.js",
+  "js/extra/deep/major-1.js",
+  "js/extra/deep/major-2.js",
+  "js/extra/deep/wands.js",
+  "js/extra/deep/cups.js",
+  "js/extra/deep/swords.js",
+  "js/extra/deep/pentacles.js",
+  "js/extra/combined/major-1.js",
+  "js/extra/combined/major-2.js",
+  "js/extra/combined/wands.js",
+  "js/extra/combined/cups.js",
+  "js/extra/combined/swords.js",
+  "js/extra/combined/pentacles.js",
   "js/spreads.js",
   "js/combos.js",
 ].map(read);
@@ -28,14 +40,18 @@ const sources = [
 // and hand the values back explicitly.
 const exported = vm.runInContext(
   sources.join("\n") +
-    "\n;({ CARDS, CARD_BY_ID, EXTRA, HEALTH_READINGS, COMBINED_READINGS, SUITS, SUIT_ORDER, RANKS, SPREADS, SPREAD_BY_ID, COMBOS, findCombos })",
+    "\n;({ CARDS, CARD_BY_ID, EXTRA, HEALTH_READINGS, DEEP_READINGS, COMBINED_READINGS, SUITS, SUIT_ORDER, RANKS, SPREADS, SPREAD_BY_ID, COMBOS, findCombos })",
   ctx,
   { filename: "data-bundle.js" }
 );
 
-const { CARDS, CARD_BY_ID, EXTRA, HEALTH_READINGS, COMBINED_READINGS, SUITS, SUIT_ORDER, RANKS, SPREADS, SPREAD_BY_ID, COMBOS, findCombos } = exported;
+const { CARDS, CARD_BY_ID, EXTRA, HEALTH_READINGS, DEEP_READINGS, COMBINED_READINGS, SUITS, SUIT_ORDER, RANKS, SPREADS, SPREAD_BY_ID, COMBOS, findCombos } = exported;
 const problems = [];
 const fail = (msg) => problems.push(msg);
+
+const DEEP_CONTEXTS = ["general", "love", "career", "health"];
+const COMBINED_SETS = ["love+career", "love+health", "career+health", "love+career+health"];
+const pairOk = (v) => Array.isArray(v) && v.length === 2 && v.every((s) => typeof s === "string" && s.trim());
 
 /* --- cards --- */
 if (CARDS.length !== 78) fail(`expected 78 cards, found ${CARDS.length}`);
@@ -58,10 +74,18 @@ for (const c of CARDS) {
     fail(`missing EXTRA entry: ${c.id}`);
     continue;
   }
-  for (const key of ["love", "career", "health", "combined"]) {
-    if (!Array.isArray(e[key]) || e[key].length !== 2 || e[key].some((s) => !s)) {
-      fail(`bad ${key} text: ${c.id}`);
-    }
+  for (const key of ["love", "career", "health"]) {
+    if (!pairOk(e[key])) fail(`bad ${key} text: ${c.id}`);
+  }
+  if (!e.deep || typeof e.deep !== "object") {
+    fail(`missing deep readings: ${c.id}`);
+  } else {
+    for (const ctx of DEEP_CONTEXTS) if (!pairOk(e.deep[ctx])) fail(`bad deep ${ctx} text: ${c.id}`);
+  }
+  if (!e.combined || typeof e.combined !== "object" || Array.isArray(e.combined)) {
+    fail(`bad combined shape: ${c.id}`);
+  } else {
+    for (const set of COMBINED_SETS) if (!pairOk(e.combined[set])) fail(`bad combined ${set} text: ${c.id}`);
   }
   if (!e.question) fail(`missing question: ${c.id}`);
   if (!Array.isArray(e.yn) || e.yn.length !== 2 || e.yn.some((v) => !["yes", "no", "maybe"].includes(v))) {
@@ -82,6 +106,12 @@ if (Object.keys(COMBINED_READINGS).length !== CARDS.length) {
 }
 for (const id of Object.keys(COMBINED_READINGS)) {
   if (!CARD_BY_ID.has(id)) fail(`combined entry for unknown card: ${id}`);
+}
+if (Object.keys(DEEP_READINGS).length !== CARDS.length) {
+  fail(`expected ${CARDS.length} deep entries, found ${Object.keys(DEEP_READINGS).length}`);
+}
+for (const id of Object.keys(DEEP_READINGS)) {
+  if (!CARD_BY_ID.has(id)) fail(`deep entry for unknown card: ${id}`);
 }
 
 /* --- artwork --- */
@@ -112,6 +142,7 @@ for (const s of SPREADS) {
 for (const c of COMBOS) {
   if (!["good", "warn", "mixed"].includes(c.kind)) fail(`combo bad kind: ${c.name}`);
   if (!c.name || !c.text) fail("combo missing name/text");
+  if (!c.long) fail(`combo missing long text: ${c.name}`);
   if (!Array.isArray(c.cards) || c.cards.length < 2) fail(`combo needs 2+ cards: ${c.name}`);
   for (const id of c.cards) if (!CARD_BY_ID.has(id)) fail(`combo "${c.name}" references unknown card: ${id}`);
 }

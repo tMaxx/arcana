@@ -708,6 +708,40 @@ dialog.modal[open] { animation: pop 0.18s ease-out; display: flex; flex-directio
 .footer { max-width: 1280px; margin: 0 auto; padding: 1rem 1.2rem 2.5rem; text-align: center; border-top: 1px solid var(--line); font-size: 0.85rem; color: var(--muted); }
 .footer p { margin: 0.3rem 0; }
 
+/* ---------------- hand views: compact list, read ---------------- */
+
+.hand-row.compact { padding: 0.6rem 0.8rem; }
+.hand-row.compact .hand-info h3 { font-size: 1.1rem; }
+.hand-row.compact .posname { margin-bottom: 0.15rem !important; }
+.hand-row.read { grid-template-columns: 96px 1fr; }
+.hand-body.reading .read-list { gap: 1.1rem; }
+.hand-body.reading .hand-info p { max-width: 72ch; line-height: 1.6; }
+.hand-body.reading .ctx-meaning { margin-top: 0.6rem !important; }
+.hand-body.reading .posname { margin-bottom: 0.4rem !important; }
+.combo-long {
+  margin-top: 0.5rem !important;
+  padding-top: 0.5rem;
+  border-top: 1px dashed var(--line);
+  color: var(--muted) !important;
+  font-size: 0.9rem !important;
+}
+.combo-brief { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.4rem; }
+.combo-brief li {
+  --k: var(--violet);
+  padding: 0.35rem 0.7rem;
+  border-left: 3px solid var(--k);
+  border-radius: 6px;
+  background: var(--panel);
+  color: #cfc8de;
+  font-size: 0.88rem;
+}
+.combo-brief li.kind-good { --k: #6fb36f; }
+.combo-brief li.kind-warn { --k: var(--danger); }
+.combo-brief li.kind-mixed { --k: var(--violet); }
+.combo-brief b { color: var(--gold); font-weight: 600; margin-right: 0.35rem; }
+.hand-combos.compact h3 { margin: 0 0 0.6rem; }
+.depth-seg button { font-size: 0.8rem; }
+
 /* ---------------- small screens ---------------- */
 
 @media (max-width: 720px) {
@@ -735,6 +769,7 @@ dialog.modal[open] { animation: pop 0.18s ease-out; display: flex; flex-directio
   #detail-pos { white-space: nowrap; }
   .combo-list { grid-template-columns: 1fr; }
   .hand-row { grid-template-columns: 72px 1fr; }
+  .hand-row.read { grid-template-columns: 72px 1fr; }
   .row-actions { grid-column: 1 / -1; flex-direction: row; justify-content: flex-end; }
   .row-actions button { flex: 1; }
   .hand-body { padding: 1rem; }

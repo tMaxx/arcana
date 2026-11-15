@@ -10,6 +10,7 @@ const KEYS = {
   art: "arcana.art.v1",
   ctx: "arcana.ctx.v1",
   combined: "arcana.combined.v1",
+  depth: "arcana.depth.v1",
   view: "arcana.view.v1",
   offline: "arcana.offline-toast.v1",
 };
@@ -158,7 +159,8 @@ const state = {
   art: pick(KEYS.art, ["art", "symbols"], "art"),
   ctx: loadCtx(),
   combined: prefs.get(KEYS.combined, "1") !== "0",
-  view: pick(KEYS.view, ["list", "layout"], "list"),
+  depth: pick(KEYS.depth, ["short", "deep"], "short"),
+  view: pick(KEYS.view, ["list", "layout", "read"], "list"),
   pendingSlot: null, // spread position waiting for a card from the grid
   navList: [], // card ids for prev/next inside the detail dialog
   navIndex: 0,
@@ -213,11 +215,25 @@ function meaningsFor(card, rev) {
   }));
 }
 
+/** Love, career and health contexts take part in combined summaries; general does not. */
+const combinedContexts = () => CONTEXTS.filter((c) => c.id !== "general" && state.ctx.includes(c.id));
+
 function combinedFor(card, rev) {
-  if (card.extra && card.extra.combined) return card.extra.combined[rev ? 1 : 0];
+  const contexts = combinedContexts();
+  if (contexts.length < 2) return "";
+  const key = contexts.map((c) => c.id).join("+");
+  const pair = card.extra && card.extra.combined && card.extra.combined[key];
+  if (pair) return pair[rev ? 1 : 0];
   return meaningsFor(card, rev)
     .map((m) => `${m.label}: ${m.text}`)
     .join(" ");
+}
+
+/** Card text for the current depth setting: short meanings or the long-form deep dive. */
+function textFor(card, rev, ctx = "general") {
+  const deep = card.extra && card.extra.deep && card.extra.deep[ctx];
+  if (state.depth === "deep" && deep) return deep[rev ? 1 : 0];
+  return meaningFor(card, rev, ctx);
 }
 
 const ynFor = (card, rev) => (card.extra ? card.extra.yn[rev ? 1 : 0] : null);
@@ -377,8 +393,14 @@ function comboHTML(combo, active) {
     `<h3>${combo.name}</h3>${active ? '<span class="badge live">In your hand</span>' : ""}</div>` +
     `<div class="chips">${chips}</div>` +
     `<p>${combo.text}</p>` +
+    (state.depth === "deep" && combo.long ? `<p class="combo-long">${combo.long}</p>` : "") +
     `</article>`
   );
+}
+
+/** One-line combination for the compact List and Layout views. */
+function comboBriefHTML(combo) {
+  return `<li class="combo-brief kind-${combo.kind}"><b>${combo.name}</b> <span>${combo.text}</span></li>`;
 }
 
 function renderCombosTab(main) {
@@ -427,16 +449,21 @@ function setTab(id, { scroll = true } = {}) {
 function syncControls() {
   $$("[data-art]").forEach((b) => b.classList.toggle("active", b.dataset.art === state.art));
   $$("[data-ctx]").forEach((b) => b.classList.toggle("active", state.ctx.includes(b.dataset.ctx)));
-  $$("[data-view]").forEach((b) => b.classList.toggle("active", b.dataset.view === state.view));
+  $$("[data-view]").forEach((b) => {
+    b.classList.toggle("active", b.dataset.view === state.view);
+    if (b.dataset.view === "layout") b.hidden = state.spread === "free";
+  });
+  $$("[data-depth]").forEach((b) => b.classList.toggle("active", b.dataset.depth === state.depth));
   $$("[data-combined]").forEach((b) => {
-    b.hidden = state.ctx.length < 2;
+    b.hidden = combinedContexts().length < 2;
     b.classList.toggle("active", state.combined);
   });
-  $$("[data-art],[data-ctx],[data-view],[data-combined]").forEach((b) =>
+  $$("[data-art],[data-ctx],[data-view],[data-depth],[data-combined]").forEach((b) =>
     b.setAttribute("aria-pressed", b.classList.contains("active"))
   );
   $("#spread-select").value = state.spread;
-  $("#view-seg").hidden = state.spread === "free";
+  $("#view-seg").hidden = false;
+  $("#hand-depth-seg").hidden = state.view !== "read" || !handCount();
 }
 
 function refreshOpenViews() {
@@ -488,10 +515,20 @@ function cycleCtx() {
 }
 
 function setView(view) {
+  if (!["list", "layout", "read"].includes(view)) return;
+  if (view === "layout" && !currentSpread().positions.length) view = "list";
   state.view = view;
   prefs.set(KEYS.view, view);
   syncControls();
   renderHand();
+}
+
+function setDepth(depth) {
+  if (!["short", "deep"].includes(depth)) return;
+  state.depth = depth;
+  prefs.set(KEYS.depth, depth);
+  syncControls();
+  refreshOpenViews();
 }
 
 function setSpread(id) {
@@ -499,7 +536,13 @@ function setSpread(id) {
   state.spread = id;
   state.pendingSlot = null;
   // A free hand has no positions, so drop any empty-slot placeholders.
-  if (!SPREAD_BY_ID.get(id).positions.length) state.hand = state.hand.filter(Boolean);
+  if (!SPREAD_BY_ID.get(id).positions.length) {
+    state.hand = state.hand.filter(Boolean);
+    if (state.view === "layout") {
+      state.view = "list";
+      prefs.set(KEYS.view, state.view);
+    }
+  }
   prefs.set(KEYS.spread, id);
   syncControls();
   updateBadge();
@@ -698,10 +741,12 @@ function handAsText() {
 
   const meaningLines = (card, rev, indent) => {
     const out = [];
-    if (contexts.length > 1 && state.combined) out.push(`${indent}Combined: ${combinedFor(card, rev)}`);
+    if (combinedContexts().length > 1 && state.combined) {
+      out.push(`${indent}Combined: ${combinedFor(card, rev)}`);
+    }
     const showLabels = contexts.length > 1 || contexts[0].id !== "general";
     contexts.forEach((ctx) => {
-      out.push(`${indent}${showLabels ? `${ctx.label}: ` : ""}${meaningFor(card, rev, ctx.id)}`);
+      out.push(`${indent}${showLabels ? `${ctx.label}: ` : ""}${textFor(card, rev, ctx.id)}`);
     });
     return out;
   };
@@ -725,7 +770,7 @@ function handAsText() {
   const combos = findCombos(handCards());
   if (combos.length) {
     lines.push("", "Combinations:");
-    combos.forEach((c) => lines.push(`- ${c.name}: ${c.text}`));
+    combos.forEach((c) => lines.push(`- ${c.name}: ${state.depth === "deep" && c.long ? c.long : c.text}`));
   }
   return lines.join("\n");
 }
@@ -755,74 +800,93 @@ function meaningsHTML(card, rev) {
   const contexts = activeContexts();
   const showLabels = contexts.length > 1 || contexts[0].id !== "general";
   const combined =
-    contexts.length > 1 && state.combined
+    combinedContexts().length > 1 && state.combined
       ? `<p class="ctx-meaning combined"><b>Combined:</b> ${combinedFor(card, rev)}</p>`
       : "";
   const body = contexts
     .map(
       (ctx) =>
-        `<p class="ctx-meaning">${showLabels ? `<b>${ctx.label}:</b> ` : ""}${meaningFor(card, rev, ctx.id)}</p>`
+        `<p class="ctx-meaning">${showLabels ? `<b>${ctx.label}:</b> ` : ""}${textFor(card, rev, ctx.id)}</p>`
     )
     .join("");
   return combined + body;
 }
 
-function handRowHTML(h, i, spread) {
+function handRowHTML(h, i, spread, mode) {
   const c = CARD_BY_ID.get(h.id);
   const pos = spread.positions[i];
+  const read = mode === "read";
   const posLine = spread.positions.length
     ? pos
-      ? `<p class="posname">${pos.name} <span>${pos.hint}</span></p>`
+      ? `<p class="posname">${pos.name}${read ? ` <span>${pos.hint}</span>` : ""}</p>`
       : `<p class="posname extra">Extra card</p>`
     : "";
-  const q = c.extra ? `<p class="ask">Ask: ${c.extra.question}</p>` : "";
+  const number = read
+    ? `<span class="pos">${i + 1}</span>`
+    : `<span class="pos" data-move="${i}" title="Drag to move this card to another position">${i + 1}</span>`;
+  const target = read ? "" : ` data-drop="${i}" data-move-to="${i}"`;
+  const drag = read ? "" : ` data-drag="p:${i}"`;
+  const body = read
+    ? `<p class="kw">${c.keywords.join(" · ")}${c.corr ? ` · <span class="corr">${c.corr}</span>` : ""}</p>` +
+      meaningsHTML(c, h.rev) +
+      (c.extra ? `<p class="ask">Ask: ${c.extra.question}</p>` : "")
+    : "";
+  const actions = read
+    ? ""
+    : `<div class="row-actions">` +
+      `<button data-flip="${c.id}" title="Flip orientation" aria-label="Flip ${c.name}">⟲ <span>Flip</span></button>` +
+      `<button data-left="${c.id}" title="Move earlier" aria-label="Move ${c.name} earlier" ${i === 0 ? "disabled" : ""}>↑</button>` +
+      `<button data-right="${c.id}" title="Move later" aria-label="Move ${c.name} later" ${i === state.hand.length - 1 ? "disabled" : ""}>↓</button>` +
+      `<button data-remove="${c.id}" title="Remove" aria-label="Remove ${c.name}">✕</button>` +
+      `</div>`;
   return (
-    `<li class="hand-row" data-id="${c.id}" data-drop="${i}" data-move-to="${i}">` +
-    `<button class="mini" data-open="${c.id}" data-from="hand" data-drag="p:${i}" draggable="false" title="Drag onto another card to make it a clarifier" aria-label="View ${c.name}">${faceHTML(c, h.rev)}</button>` +
+    `<li class="hand-row ${read ? "read" : "compact"}" data-id="${c.id}"${target}>` +
+    `<button class="mini" data-open="${c.id}" data-from="hand"${drag} draggable="false"${read ? "" : ` title="Drag onto another card to make it a clarifier"`} aria-label="View ${c.name}">${faceHTML(c, h.rev)}</button>` +
     `<div class="hand-info">` +
     posLine +
-    `<h3><span class="pos" data-move="${i}" title="Drag to move this card to another position">${i + 1}</span> ${c.name} <span class="orient ${h.rev ? "rev" : ""}">${h.rev ? "Reversed" : "Upright"}</span> ${ynBadge(c, h.rev)}</h3>` +
-    `<p class="kw">${c.keywords.join(" · ")}${c.corr ? ` · <span class="corr">${c.corr}</span>` : ""}</p>` +
-    meaningsHTML(c, h.rev) +
-    q +
+    `<h3>${number} ${c.name} <span class="orient ${h.rev ? "rev" : ""}">${h.rev ? "Reversed" : "Upright"}</span> ${ynBadge(c, h.rev)}</h3>` +
+    body +
     `</div>` +
-    `<div class="row-actions">` +
-    `<button data-flip="${c.id}" title="Flip orientation" aria-label="Flip ${c.name}">⟲ <span>Flip</span></button>` +
-    `<button data-left="${c.id}" title="Move earlier" aria-label="Move ${c.name} earlier" ${i === 0 ? "disabled" : ""}>↑</button>` +
-    `<button data-right="${c.id}" title="Move later" aria-label="Move ${c.name} later" ${i === state.hand.length - 1 ? "disabled" : ""}>↓</button>` +
-    `<button data-remove="${c.id}" title="Remove" aria-label="Remove ${c.name}">✕</button>` +
-    `</div>` +
+    actions +
     `</li>`
   );
 }
 
-function clarifierRowHTML(h, i, spread) {
+function clarifierRowHTML(h, i, spread, mode) {
   if (!h.clarifier) return "";
+  const read = mode === "read";
   const clar = h.clarifier;
   const c = CARD_BY_ID.get(clar.id);
   const pos = spread.positions[i];
   const posLine = `<p class="posname clarifier">Clarifier${pos ? ` for ${pos.name}` : ""}</p>`;
-  const q = c.extra ? `<p class="ask">Ask: ${c.extra.question}</p>` : "";
+  const target = read ? "" : ` data-drop="${i}" data-move-to="${i}"`;
+  const drag = read ? "" : ` data-drag="c:${i}"`;
+  const body = read
+    ? `<p class="kw">${c.keywords.join(" · ")}${c.corr ? ` · <span class="corr">${c.corr}</span>` : ""}</p>` +
+      meaningsHTML(c, clar.rev) +
+      (c.extra ? `<p class="ask">Ask: ${c.extra.question}</p>` : "")
+    : "";
+  const actions = read
+    ? ""
+    : `<div class="row-actions">` +
+      `<button data-flip="${c.id}" title="Flip orientation" aria-label="Flip ${c.name}">⟲ <span>Flip</span></button>` +
+      `<button data-remove="${c.id}" title="Remove clarifier" aria-label="Remove clarifier ${c.name}">✕</button>` +
+      `</div>`;
   return (
-    `<li class="hand-row clarifier-row" data-id="${c.id}" data-drop="${i}" data-move-to="${i}">` +
-    `<button class="mini" data-open="${c.id}" data-from="hand" data-drag="c:${i}" draggable="false" title="Drag onto another card to move it" aria-label="View ${c.name}">${faceHTML(c, clar.rev)}</button>` +
+    `<li class="hand-row clarifier-row ${read ? "read" : "compact"}" data-id="${c.id}"${target}>` +
+    `<button class="mini" data-open="${c.id}" data-from="hand"${drag} draggable="false"${read ? "" : ` title="Drag onto another card to move it"`} aria-label="View ${c.name}">${faceHTML(c, clar.rev)}</button>` +
     `<div class="hand-info">` +
     posLine +
     `<h3>${c.name} <span class="orient ${clar.rev ? "rev" : ""}">${clar.rev ? "Reversed" : "Upright"}</span> ${ynBadge(c, clar.rev)}</h3>` +
-    `<p class="kw">${c.keywords.join(" · ")}${c.corr ? ` · <span class="corr">${c.corr}</span>` : ""}</p>` +
-    meaningsHTML(c, clar.rev) +
-    q +
+    body +
     `</div>` +
-    `<div class="row-actions">` +
-    `<button data-flip="${c.id}" title="Flip orientation" aria-label="Flip ${c.name}">⟲ <span>Flip</span></button>` +
-    `<button data-remove="${c.id}" title="Remove clarifier" aria-label="Remove clarifier ${c.name}">✕</button>` +
-    `</div>` +
+    actions +
     `</li>`
   );
 }
 
-function entryRowsHTML(h, i, spread) {
-  return handRowHTML(h, i, spread) + clarifierRowHTML(h, i, spread);
+function entryRowsHTML(h, i, spread, mode) {
+  return handRowHTML(h, i, spread, mode) + clarifierRowHTML(h, i, spread, mode);
 }
 
 function emptySlotRowHTML(i, pos) {
@@ -871,9 +935,10 @@ function renderHand() {
   const spread = currentSpread();
   const n = handCount();
   const total = spread.positions.length;
+  const view = state.view === "layout" && !total ? "list" : state.view;
+  const read = view === "read";
   const cards = handCards();
   const clarCount = state.hand.filter((h) => h && h.clarifier).length;
-  const inSpread = state.hand.filter((h, i) => i < total && h).length;
   const extras = state.hand.map((h, i) => ({ h, i })).filter((x) => x.i >= total && x.h);
 
   const countLabel = total ? `${n} / ${total} cards` : n ? `${n} card${n === 1 ? "" : "s"}` : "empty";
@@ -886,14 +951,17 @@ function renderHand() {
     ? `<p class="spread-blurb"><b>${spread.name}.</b> ${spread.blurb} Cards fill the positions in order.</p>`
     : "";
   const dragHint =
-    n > 1
+    !read && n > 1
       ? `<p class="dnd-hint">Drag a card onto another to make it its clarifier, or drag a position number to move it.</p>`
       : "";
-  const healthNote = state.ctx.includes("health")
-    ? `<p class="health-note">Health readings are symbolic reflections on wellbeing, not medical advice.</p>`
-    : "";
+  const healthNote =
+    read && state.ctx.includes("health")
+      ? `<p class="health-note">Health readings are symbolic reflections on wellbeing, not medical advice.</p>`
+      : "";
 
-  if (!n && !total) {
+  body.classList.toggle("reading", read);
+
+  if (!n && (read || !total)) {
     body.innerHTML =
       healthNote +
       `<div class="empty-hand"><p>Your hand is empty.</p>` +
@@ -901,26 +969,27 @@ function renderHand() {
     return;
   }
 
-  const showLayout = total && state.view === "layout";
   let main;
-  if (showLayout) {
+  if (view === "layout") {
     main = layoutHTML(spread);
     if (extras.length) {
       main += `<h3 class="section-h">Extra cards</h3><ol class="hand-list" start="${total + 1}">${extras
-        .map(({ h, i }) => entryRowsHTML(h, i, spread))
+        .map(({ h, i }) => entryRowsHTML(h, i, spread, "compact"))
         .join("")}</ol>`;
     }
-    if (inSpread) {
-      main += `<h3 class="section-h">Readings</h3><ol class="hand-list">${state.hand
-        .map((h, i) => (i < total && h ? entryRowsHTML(h, i, spread) : ""))
-        .join("")}</ol>`;
+  } else if (read) {
+    const rows = [];
+    const len = Math.max(state.hand.length, total);
+    for (let i = 0; i < len; i++) {
+      if (state.hand[i]) rows.push(entryRowsHTML(state.hand[i], i, spread, "read"));
     }
+    main = `<ol class="hand-list read-list">${rows.join("")}</ol>`;
   } else {
     const rows = [];
     const len = Math.max(state.hand.length, total);
     for (let i = 0; i < len; i++) {
       const h = state.hand[i];
-      if (h) rows.push(entryRowsHTML(h, i, spread));
+      if (h) rows.push(entryRowsHTML(h, i, spread, "compact"));
       else if (i < total) rows.push(emptySlotRowHTML(i, spread.positions[i]));
     }
     main = `<ol class="hand-list">${rows.join("")}</ol>`;
@@ -935,11 +1004,18 @@ function renderHand() {
   }
 
   const combos = findCombos(cards);
-  const comboBlock = combos.length
-    ? `<section class="hand-combos"><h3>Combinations in this reading</h3><div class="combo-list">${combos.map((c) => comboHTML(c, false)).join("")}</div></section>`
-    : cards.length > 1
-      ? `<section class="hand-combos"><h3>Combinations in this reading</h3><p class="muted">None of the known combinations appear in this hand.</p></section>`
-      : "";
+  let comboBlock = "";
+  if (read) {
+    comboBlock = combos.length
+      ? `<section class="hand-combos"><h3>Combinations in this reading</h3><div class="combo-list">${combos.map((c) => comboHTML(c, false)).join("")}</div></section>`
+      : cards.length > 1
+        ? `<section class="hand-combos"><h3>Combinations in this reading</h3><p class="muted">None of the known combinations appear in this hand.</p></section>`
+        : "";
+  } else if (combos.length) {
+    comboBlock = `<section class="hand-combos compact"><h3>Combinations</h3><ul class="combo-brief">${combos
+      .map(comboBriefHTML)
+      .join("")}</ul></section>`;
+  }
 
   body.innerHTML = intro + dragHint + healthNote + tally + main + comboBlock;
 }
@@ -1001,20 +1077,20 @@ function renderDetail() {
     : "";
   const reflect = card.extra ? `<h3>Reflect</h3><p class="ask">${card.extra.question}</p>` : "";
   const contexts = activeContexts();
-  const showCombined = contexts.length > 1 && state.combined;
+  const showCombined = combinedContexts().length > 1 && state.combined;
   const perContext =
     contexts.length === 1
       ? `<h3>Upright${contexts[0].id === "general" ? "" : ` <small>${contexts[0].label}</small>`}</h3>` +
-        `<p>${meaningFor(card, false, contexts[0].id)}</p>` +
+        `<p>${textFor(card, false, contexts[0].id)}</p>` +
         `<h3>Reversed${contexts[0].id === "general" ? "" : ` <small>${contexts[0].label}</small>`}</h3>` +
-        `<p>${meaningFor(card, true, contexts[0].id)}</p>`
+        `<p>${textFor(card, true, contexts[0].id)}</p>`
       : contexts
           .map(
             (ctx) =>
               `<section class="ctx-block">` +
               `<h3>${ctx.label}</h3>` +
-              `<p><span class="ctx-orient">Upright</span> ${meaningFor(card, false, ctx.id)}</p>` +
-              `<p><span class="ctx-orient">Reversed</span> ${meaningFor(card, true, ctx.id)}</p>` +
+              `<p><span class="ctx-orient">Upright</span> ${textFor(card, false, ctx.id)}</p>` +
+              `<p><span class="ctx-orient">Reversed</span> ${textFor(card, true, ctx.id)}</p>` +
               `</section>`
           )
           .join("");
@@ -1231,6 +1307,9 @@ document.addEventListener("click", (e) => {
   const view = t.closest("[data-view]");
   if (view) return setView(view.dataset.view);
 
+  const depth = t.closest("[data-depth]");
+  if (depth) return setDepth(depth.dataset.depth);
+
   const empty = t.closest("[data-empty]");
   if (empty) return fillEmptySlot(Number(empty.dataset.empty));
 
@@ -1335,6 +1414,9 @@ document.addEventListener("keydown", (e) => {
 $("#spread-select").innerHTML = SPREADS.map(
   (s) => `<option value="${s.id}">${s.name}${s.positions.length ? ` (${s.positions.length})` : ""}</option>`
 ).join("");
+
+// A layout only makes sense for a spread with positions.
+if (state.view === "layout" && !currentSpread().positions.length) state.view = "list";
 
 syncControls();
 updateBadge();
