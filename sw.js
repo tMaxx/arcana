@@ -6,7 +6,7 @@
  * - Card artwork is precached too and served cache-first.
  * Bump VERSION to force clients to drop old caches. */
 
-const VERSION = "v4";
+const VERSION = "v5";
 const SHELL_CACHE = `arcana-shell-${VERSION}`;
 const ART_CACHE = `arcana-art-${VERSION}`;
 
@@ -43,6 +43,7 @@ const SHELL = [
   "icons/icon-512.png",
   "icons/icon-maskable-512.png",
   "icons/apple-touch-icon.png",
+  "icons/0rwx-aix.svg",
 ];
 const ART = CARDS.map((c) => `img/cards/${c.id}.webp`);
 

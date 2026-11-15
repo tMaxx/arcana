@@ -6,7 +6,7 @@ Repository: https://github.com/tMaxx/arcana
 
 ## AI-created content
 
-This project was built with AI assistance. The code, card interpretations, and love/career/health texts were generated or heavily edited by an AI coding agent, then checked for consistency. They are a starting point, not authoritative advice. Health readings are symbolic wellbeing themes, **not medical advice**. Use your own judgement.
+This project was built with AI assistance. The code, card interpretations, and love/career/health texts were generated or heavily edited by an AI coding agent, then checked for consistency. It is labelled **AI:X** on the [0rwx](https://0rwx.com/) scale: the code was mostly written by AI and curated by a human who knows her shit in web design and IT. The readings are a starting point, not authoritative advice.
 
 ## Features
 
@@ -112,4 +112,4 @@ If you found this code or idea helpful, let me know lol.
 
 ## Credits
 
-Card artwork: Pamela Colman Smith, 1909 (public domain), scans via Wikimedia Commons. Interpretations are condensed Rider–Waite–Smith readings, not quoted from a book.
+Card artwork: Pamela Colman Smith, 1909 (public domain), scans via Wikimedia Commons. Interpretations are condensed Rider–Waite–Smith readings, not quoted from a book. The AI:X badge is from the [0rwx](https://0rwx.com/) framework by Namtao Productions, released into the public domain (CC0).

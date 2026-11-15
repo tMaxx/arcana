@@ -734,9 +734,6 @@ function handAsText() {
   if (!(contexts.length === 1 && contexts[0].id === "general")) {
     lines.push(`Context: ${contexts.map((c) => c.label).join(", ")}`);
   }
-  if (contexts.some((c) => c.id === "health")) {
-    lines.push("Health readings are symbolic reflections on wellbeing, not medical advice.");
-  }
   if (lines.length) lines.push("");
 
   const meaningLines = (card, rev, indent) => {
@@ -954,16 +951,11 @@ function renderHand() {
     !read && n > 1
       ? `<p class="dnd-hint">Drag a card onto another to make it its clarifier, or drag a position number to move it.</p>`
       : "";
-  const healthNote =
-    read && state.ctx.includes("health")
-      ? `<p class="health-note">Health readings are symbolic reflections on wellbeing, not medical advice.</p>`
-      : "";
 
   body.classList.toggle("reading", read);
 
   if (!n && (read || !total)) {
     body.innerHTML =
-      healthNote +
       `<div class="empty-hand"><p>Your hand is empty.</p>` +
       `<p class="muted">Use the <b>+</b> on any card to draw it into the reading, or pick a spread above.</p></div>`;
     return;
@@ -1017,7 +1009,7 @@ function renderHand() {
       .join("")}</ul></section>`;
   }
 
-  body.innerHTML = intro + dragHint + healthNote + tally + main + comboBlock;
+  body.innerHTML = intro + dragHint + tally + main + comboBlock;
 }
 
 function openHand() {
@@ -1099,9 +1091,6 @@ function renderDetail() {
       `<p><span class="ctx-orient">Upright</span> ${combinedFor(card, false)}</p>` +
       `<p><span class="ctx-orient">Reversed</span> ${combinedFor(card, true)}</p></section>`
     : "";
-  const healthNote = contexts.some((c) => c.id === "health")
-    ? `<p class="health-note">Health readings are symbolic reflections on wellbeing, not medical advice.</p>`
-    : "";
 
   $("#detail-body").innerHTML =
     `<div class="detail-card">${faceHTML(card)}</div>` +
@@ -1111,7 +1100,6 @@ function renderDetail() {
     `<ul class="chips kw-chips">${card.keywords.map((k) => `<li class="chip static">${k}</li>`).join("")}</ul>` +
     combinedBlock +
     perContext +
-    healthNote +
     (yn ? `<h3>Yes / no</h3>${yn}` : "") +
     reflect +
     relatedHTML +

@@ -2,9 +2,9 @@
 
 /* ------------------------------------------------------------------ *
  * Health readings.
- * Symbolic wellbeing themes in the Rider-Waite-Smith tradition, not
- * medical advice. Kept separate from the love/career content so the
- * health voice can be edited on its own.
+ * Symbolic wellbeing themes in the Rider-Waite-Smith tradition. Kept
+ * separate from the love/career content so the health voice can be
+ * edited on its own.
  * ------------------------------------------------------------------ */
 
 const HEALTH_READINGS = {

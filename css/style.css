@@ -564,7 +564,6 @@ dialog.modal[open] { animation: pop 0.18s ease-out; display: flex; flex-directio
 .yn-maybe { color: #c9b6ff; }
 .yn-row { display: flex; gap: 1.5rem; flex-wrap: wrap; color: #d8d1e6; }
 .tally { margin: 0 0 1rem; display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; font-size: 0.9rem; }
-.health-note { margin: 0 0 1rem; padding: 0.5rem 0.8rem; border-left: 3px solid var(--pentacles); background: #6fb36f14; border-radius: 6px; color: #cfc8de; font-size: 0.85rem; }
 
 /* ---------------- multi-context / clarifier ---------------- */
 
@@ -707,6 +706,20 @@ dialog.modal[open] { animation: pop 0.18s ease-out; display: flex; flex-directio
 
 .footer { max-width: 1280px; margin: 0 auto; padding: 1rem 1.2rem 2.5rem; text-align: center; border-top: 1px solid var(--line); font-size: 0.85rem; color: var(--muted); }
 .footer p { margin: 0.3rem 0; }
+.footer .disclaimer { max-width: 68ch; margin: 0.9rem auto 0; font-style: italic; }
+.footer .badge-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  max-width: 68ch;
+  margin: 1rem auto 0;
+  text-align: left;
+}
+.footer .badge-row img { display: block; width: 34px; height: 34px; opacity: 0.75; }
+.footer .badge-row a:hover img { opacity: 1; }
+.footer .badge-row span { font-size: 0.8rem; line-height: 1.5; }
+.footer .badge-row a { color: var(--gold); }
 
 /* ---------------- hand views: compact list, read ---------------- */
 

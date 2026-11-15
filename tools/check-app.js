@@ -288,7 +288,6 @@ const health = meaningFor(CARD_BY_ID.get("fool"), false, "health");
 check(health === EXTRA.fool.health[0], "health context did not select health text");
 const healthText = handAsText();
 check(healthText.includes("Context: Health"), "health context missing from copied text");
-check(healthText.includes("not medical advice"), "health disclaimer missing from copied text");
 
 // Multi-context selection + optional combined summary.
 setCtx("general");
